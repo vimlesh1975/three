@@ -96,7 +96,7 @@ const Threejs = () => {
                 var loader = new THREE.TextureLoader();
                 loader.crossOrigin = "";
                 loader.load(e.target.result, texture => {
-                    const material = new THREE.MeshBasicMaterial({ map: texture });
+                    const material = new THREE.MeshBasicMaterial({ map: texture, color: 'grey' });
                     selectedObject.material = material;
                     selectedObject.material.map.needsUpdate = true;
                 }, () => { }, error => {
