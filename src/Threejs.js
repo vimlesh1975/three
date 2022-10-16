@@ -338,8 +338,6 @@ const Threejs = () => {
                     <group visible={true}>
                         <primitive object={new THREE.AxesHelper(3)} />
                     </group>
-
-                    {/* < ExampleBox /> */}
                 </Suspense>
             </Canvas>
         </div>
@@ -363,6 +361,7 @@ const Threejs = () => {
         }>load above as gltf</button>
         <button onClick={updatetoCaspar2}>Update to Caspar</button>
         <button onClick={resetCamera2}>Reset Camera</button>
+        <button onClick={() => console.log(scene2)}>console log</button>
         <div style={{ width: 880, height: 330, backgroundColor: 'grey' }} >
 
 
