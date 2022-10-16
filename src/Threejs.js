@@ -332,6 +332,12 @@ const Threejs = () => {
                             <meshStandardMaterial />
                         </Text3D>
                     </group>
+                    <group visible={true}>
+                        <primitive object={new THREE.GridHelper(10, 13, 'red', 'darkgrey')} />
+                    </group>
+                    <group visible={true}>
+                        <primitive object={new THREE.AxesHelper(3)} />
+                    </group>
 
                     {/* < ExampleBox /> */}
                 </Suspense>
