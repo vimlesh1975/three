@@ -101,8 +101,7 @@ const Threejs = () => {
                     selectedObject.material.map.needsUpdate = true;
                 }, () => { }, error => {
                     console.log(error)
-                }
-                );
+                });
             }
             reader.readAsDataURL(inp);
         }
