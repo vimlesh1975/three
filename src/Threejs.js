@@ -12,6 +12,17 @@ import { GLTFExporter } from './GLTFExporter.js';
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
+// import { JSONTree } from 'react-json-tree';
+
+import { getProject } from '@theatre/core'
+
+import studio from '@theatre/studio'
+import extension from '@theatre/r3f/dist/extension'
+import { editable as e, SheetProvider } from '@theatre/r3f'
+studio.initialize()
+studio.extend(extension)
+
+const demoSheet = getProject('Demo Project').sheet('Demo Sheet')
 
 const transformMode = ["scale", "rotate", "translate"];
 
@@ -33,6 +44,98 @@ const Threejs = () => {
     const [orbitcontrolenable, setorbitcontrolenable] = useState(false)
     const [pickableObjects, setPickableObjects] = useState([])
     const [selectedObject, setSelectedObject] = useState();
+
+    const Shape = (props) => {
+
+        const mesh = useRef();
+        // useFrame(() => {
+        //     mesh.current.rotation.x = mesh.current.rotation.y += 0.01;
+        // });
+
+
+        const allShapes = {
+            box: new THREE.BoxGeometry(6, 1, 0.3),
+            cylinder: new THREE.CylinderGeometry(1, 1, 1, 32),
+            donut: new THREE.TorusGeometry(0.5, 0.2, 3, 20),
+            sphere: new THREE.SphereGeometry(0.5, 16, 16),
+            text3d: async () => {
+                var loader = new FontLoader();
+                var geometry;
+                loader.load(window.location.origin + "/ReactCasparClient/helvetiker_regular.typeface.json", function (font) {
+                    geometry = new STDLIB.TextGeometry(f0, {
+                        font: font,
+                        size: 1.2,
+                        height: .001,
+                        curveSegments: 10,
+                        bevelThickness: 0.1,
+                        bevelSize: 0.01,
+                        bevelEnabled: true,
+                    });
+                    return geometry
+                })
+                return geometry
+            }
+        }
+
+        const allColors = {
+            box: "red",
+            cylinder: "pink",
+            donut: "blue",
+            sphere: "green",
+            text3d: 'white',
+        }
+
+        return (
+            <e.mesh {...props} ref={mesh} scale={[1.5, 1.5, 1.5]} theatreKey={props.shape}>
+                <primitive object={allShapes[props.shape]} attach={"geometry"} />
+                <meshStandardMaterial color={allColors[props.shape]} />
+            </e.mesh>
+        );
+    }
+    const [shapesOnCanvas, setShapesOnCanvas] = useState([])
+
+    const addShape = (e) => {
+        const shapeCount = shapesOnCanvas.length
+        const shape = e.target.getAttribute("data-shape")
+        setShapesOnCanvas(
+            [
+                ...shapesOnCanvas,
+                <Shape
+                    shape={shape}
+                    key={shapeCount}
+                    position={[-4 + (Math.random()) * 10, 0, 0]}
+                />
+            ]
+        )
+
+
+
+        // regularWork(shape);
+        // console.log(<primitive object={<Shape shape={shape} />} />)
+        // scene1.add(<Shape shape={shape} />)
+        // console.log(<Shape shape={shape} />)
+
+
+    }
+    useEffect(() => {
+        if (scene1?.children) {
+
+            const aa = [...scene1.children];
+            aa.splice(0, 3)
+            console.log(aa)
+            setPickableObjects(aa);
+
+            if (shapesOnCanvas.length > 0) {
+                scene1.children[2].attach(scene1.children[scene1.children.length - 1])
+                setSelectedObject(scene1.children[scene1.children.length - 1])
+            }
+        }
+
+        return () => {
+            // second
+        }
+
+    }, [shapesOnCanvas.length, scene1?.children?.length])
 
 
     const showToCasparcg = () => {
@@ -174,58 +277,56 @@ const Threejs = () => {
     }
     const [f0, setF0] = useState('Vimlesh Kumar');
 
+    // const [json, setJson] = useState({
+    //     array: [1, 2, 3],
+    //     bool: true,
+    //     object: {
+    //         foo: 'bar',
+    //     }
+    // })
+
     const regularWork = (sphere) => {
         const dd = scene1.children[2]
         scene1.add(sphere);
+        // scene1.children.push(sphere);
+
         dd.attach(sphere);
+
+        // const updatedScene = scene1;
+        const updatedScene = scene1;
+        setScene1(updatedScene);
+
+
         setPickableObjects([...pickableObjects, sphere]);
         setSelectedObject(sphere)
+        // setJson({ ...json, aa: 'bb' })
+
+
+
     }
 
-    const loadfabricjstoCasparcg = (canvas) => {
-        canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
-        canvas.discardActiveObject();
-        canvas.requestRenderAll();
-        try {
-            canvas.getElement().toBlob(blob => {
-                var a = new FileReader();
-                a.onload = function (e) {
-                    const geometry = new THREE.BoxGeometry(7, 4, 5);
-                    const material = new THREE.MeshBasicMaterial({ transparent: true, map: new THREE.TextureLoader().load(e.target.result) });
-                    const sphere = new THREE.Mesh(geometry, material);
-                    regularWork(sphere);
-                }
-                a.readAsDataURL(blob);
-            })
-        } catch (error) {
-            console.log(error)
-        }
-        // }
-    }
-
-
-    const addSphere = () => {
-        const geometry = new THREE.SphereGeometry(0.5, 16, 16);
-        const material = new THREE.MeshStandardMaterial({ color: 'hotpink', transparent: true });
+    const loadfabricjstoCasparcg = () => {
+        const geometry = new THREE.BoxGeometry(7, 4, 5);
+        // const geometry = new THREE.PlaneGeometry(15, 7.6);
+        const material = new THREE.MeshBasicMaterial({ transparent: true, map: new THREE.TextureLoader().load(localStorage.getItem('RCC_currentcanvas')) });
         const sphere = new THREE.Mesh(geometry, material);
         regularWork(sphere);
-
     }
+
+
 
     const addBox = () => {
         const geometry = new THREE.BoxGeometry(11, 1, 0.3);
         const material = new THREE.MeshStandardMaterial({ color: 'maroon' });
         const sphere = new THREE.Mesh(geometry, material);
         sphere.position.set(0, -3, 0);
+        sphere.userData = { name: f0 }
         regularWork(sphere);
-
     }
 
     const addDreiText = () => {
-        // const geometry = scene1.children[3].children[0].geometry;
-
         var loader = new FontLoader();
-        loader.load("helvetiker_regular.typeface.json", function (font) {
+        loader.load(window.location.origin + "/ReactCasparClient/helvetiker_regular.typeface.json", function (font) {
             var geometry = new STDLIB.TextGeometry(f0, {
                 font: font,
                 size: 1.2,
@@ -233,7 +334,7 @@ const Threejs = () => {
                 curveSegments: 10,
                 bevelThickness: 0.1,
                 bevelSize: 0.01,
-                bevelEnabled: true
+                bevelEnabled: true,
             });
 
             const material = new THREE.MeshStandardMaterial({ color: 'white' });
@@ -247,7 +348,7 @@ const Threejs = () => {
 
 
     const addDreiText2 = () => {
-        const sphere = STDLIB.createText(f0, 2)
+        const sphere = STDLIB.createText(f0, 1.5)
         regularWork(sphere);
 
     }
@@ -259,6 +360,7 @@ const Threejs = () => {
             aa.position.set(2, 2, 2); // or any other coordinates
             scene1.add(aa);
             setPickableObjects([...pickableObjects, aa]);
+            setSelectedObject(aa);
         }
     }
 
@@ -271,17 +373,20 @@ const Threejs = () => {
                 return (val !== intersects[0].object)
             })
             setPickableObjects(updatedpickableObjects);
+            setSelectedObject(null);
         }
     }
     const deleteAll = () => {
-        setPickableObjects([]);
+        // setPickableObjects([]);
+        // setSelectedObject(null);
         pickableObjects.forEach((object) => {
             scene1.remove(object);
         })
     }
 
     const DeselectAll = () => {
-        scene1.children[2].detach()
+        scene1.children[2].detach();
+        setSelectedObject(null);
     }
     const applyColor = (e) => {
         if (selectedObject) {
@@ -333,8 +438,13 @@ const Threejs = () => {
 
             </div>
 
-            <button onClick={() => addSphere()}>Sphere</button>
-            <button onClick={() => addBox()}>Box</button>
+            <button onClick={addShape} data-shape={"box"}>Box </button>
+            <button onClick={addShape} data-shape={"cylinder"}>Cylinder </button>
+            <button onClick={addShape} data-shape={"donut"}>Donut </button>
+            <button onClick={addShape} data-shape={"sphere"}>sphere </button>
+            {/* <button onClick={addShape} data-shape={"text3d"}>text3d </button> */}
+
+            {/* <button onClick={() => addBox()}>Box</button> */}
             <button onClick={() => addDreiText()}>3D Text</button>
             <button onClick={() => addDreiText2()}>2D Text</button>
             <button onClick={() => changetext()}>Change text</button>
@@ -350,44 +460,44 @@ const Threejs = () => {
 
             {transformMode.map((val, i) =>
                 <span key={i}>  <input defaultChecked={(val === 'translate') ? true : false} onClick={e => transform.current.setMode(e.target.value)} type="radio" id={val} value={val} name="transformMode" /><label htmlFor={val}>{val}</label></span>
-            )}  <br />
+            )}
             Texture<input id="importjson" type='file' className='input-file' accept='.png,jpg,.bmp,.jpeg' onChange={e => applyTexture(e.target.files[0])} />
 
 
             <button onClick={updatetoCaspar1}>Update to Caspar</button>
             <button onClick={resetCamera1}>Reset Camera</button>
-            <button onClick={() => loadfabricjstoCasparcg(window.editor.canvas)}>Load fabricjs here</button>
+            <button onClick={() => loadfabricjstoCasparcg()}>Load fabricjs here</button>
 
             <button onClick={drawingFileSaveAsgltf}>Scene FileSave As gltf</button>
             <label htmlFor='hhh'> orbitcontrolenable: <input id='hhh' type={'checkbox'} checked={orbitcontrolenable} onChange={() => setorbitcontrolenable(!orbitcontrolenable)} /></label>
-            <button onClick={() => console.log(scene1)}>console log</button>
+            <button onClick={() => console.log(scene1.children)}>console log</button>
+            {/* <JSONTree data={scene1.children} />; */}
 
         </div>
         <div style={{ width: 880, height: 450, backgroundColor: 'grey' }} >
-            <Canvas
+            <Canvas gl={{ preserveDrawingBuffer: true }}
                 onCreated={({ gl, raycaster, scene, camera }) => {
                     setScene1(scene);
                     setCamera1(camera);
                     setRaycaster1(raycaster);
                     // setGl1(gl);
+                    console.log('added')
+
                 }}
             >
-                <OrbitControls enabled={orbitcontrolenable} />
-                <TransformControls ref={transform} />
-                <spotLight position={[10, 15, 10]} angle={10.5} />
-                <Suspense fallback={null}>
-                    {/* <group visible={true}>
-                        <primitive object={new THREE.GridHelper(10, 13, 'red', 'darkgrey')} />
-                    </group>
-                    <group visible={true}>
-                        <primitive object={new THREE.AxesHelper(3)} />
-                    </group> */}
-                </Suspense>
+                <SheetProvider sheet={demoSheet}>
+                    <OrbitControls enabled={orbitcontrolenable} />
+                    <TransformControls ref={transform} />
+                    <spotLight position={[10, 15, 10]} angle={10.5} />
+                    <Suspense fallback={null}>
+                    </Suspense>
+                    {[...shapesOnCanvas]}
+                </SheetProvider>
             </Canvas>
         </div>
 
-        gltf file <input id="importjson" type='file' className='input-file' accept='.gltf' onChange={e => importScenefromfilegltf(e.target.files[0])} />
-        <button onClick={async () => {
+        gltf file < input id="importjson" type='file' className='input-file' accept='.gltf' onChange={e => importScenefromfilegltf(e.target.files[0])} />
+        < button onClick={async () => {
             const exporter = new GLTFExporter();
             exporter.parse(scene1, gltf => {
                 const inp = JSON.stringify(gltf);
@@ -402,12 +512,12 @@ const Threejs = () => {
                 {}
             );
         }
-        }>load above as gltf</button>
+        }> load above as gltf</button >
         <button onClick={updatetoCaspar2}>Update to Caspar</button>
         <button onClick={resetCamera2}>Reset Camera</button>
         <button onClick={addLight}>Add light</button>
         <button onClick={() => console.log(scene2)}>console log</button>
-        <div style={{ width: 880, height: 330, backgroundColor: 'grey' }} >
+        <div style={{ width: 880, height: 300, backgroundColor: 'grey' }} >
 
 
             <Canvas onCreated={({ gl, raycaster, scene, camera }) => {
