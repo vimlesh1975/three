@@ -1,5 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, TransformControls } from "@react-three/drei";
+
 import * as THREE from 'three'
 import React, { useEffect } from 'react'
 // import boldUrl from 'three/examples/fonts/helvetiker_bold.typeface.json'
@@ -19,17 +20,22 @@ import { getProject } from '@theatre/core'
 import studio from '@theatre/studio'
 import extension from '@theatre/r3f/dist/extension'
 import { editable as e, SheetProvider } from '@theatre/r3f'
+// import projectState from './state.json'
+
 studio.initialize()
 studio.extend(extension)
 
 const demoSheet = getProject('Demo Project').sheet('Demo Sheet')
+// const demoSheet = getProject('Demo Project', { state: projectState }).sheet('Demo Sheet')
 
 const transformMode = ["scale", "rotate", "translate"];
 
 var intersects;
 
 const Threejs = () => {
-
+    useEffect(() => {
+        demoSheet.sequence.play({ iterationCount: Infinity, range: [0, 1] })
+    }, [])
 
     const [scene1, setScene1] = useState({});
     const [scene2, setScene2] = useState({});
@@ -46,6 +52,7 @@ const Threejs = () => {
     const [selectedObject, setSelectedObject] = useState();
 
     const Shape = (props) => {
+
         const mesh = useRef();
         const allShapes = {
             box: new THREE.BoxGeometry(6, 1, 0.3),
@@ -60,7 +67,13 @@ const Threejs = () => {
             sphere: "green",
         }
         return (
-            <e.mesh {...props} ref={mesh} scale={[1.5, 1.5, 1.5]} >
+            <e.mesh
+                {...props}
+                ref={mesh}
+                scale={[1.5, 1.5, 1.5]}
+                onPointerOver={e => console.log('hover')}
+                onPointerOut={e => console.log('unhover')}
+            >
                 <primitive object={allShapes[props.shape]} attach={"geometry"} />
                 <meshStandardMaterial color={allColors[props.shape]} />
             </e.mesh>
@@ -452,106 +465,113 @@ const Threejs = () => {
         // eslint-disable-next-line
     }, [pickableObjects])
 
-    return (<div >
-        <div >
+    return (<div>
+        <div style={{ display: 'flex', border: '1px solid red' }}>
+            <div style={{ minWidth: 200, backgroundColor: 'darkgrey', border: '1px solid red' }}> </div>
             <div style={{ border: '1px solid red' }}>
-                Casparc Control
-                <button onClick={() => window.open("/ReactCasparClient/threejs")}> Opebn Full Window</button>
-                <button onClick={showToCasparcg}>Initialise casparcg</button>
-                <button onClick={resetCameraToCasparc}>caspar camera Reset</button>
+                <div style={{ border: '1px solid red' }}>
+                    <div style={{ border: '1px solid red' }}>
+                        Casparc Control
+                        <button onClick={() => window.open("/ReactCasparClient/threejs")}> Opebn Full Window</button>
+                        <button onClick={showToCasparcg}>Initialise casparcg</button>
+                        <button onClick={resetCameraToCasparc}>caspar camera Reset</button>
 
+                    </div>
+
+                    <button onClick={addBox} data-shape={"box"}>Box </button>
+                    <button onClick={addShape} data-shape={"cylinder"}>Cylinder </button>
+                    <button onClick={addShape} data-shape={"donut"}>Donut </button>
+                    <button onClick={addShape} data-shape={"sphere"}>sphere </button>
+                    {/* <button onClick={addShape} data-shape={"text3d"}>text3d </button> */}
+
+                    {/* <button onClick={() => addBox()}>Box</button> */}
+                    <button onClick={addDreiText} data-shape={"text3D"}>3D Text</button>
+                    <button onClick={() => addDreiText2()}>2D Text</button>
+                    <button onClick={() => changetext()}>Change text</button>
+
+
+                    <button onClick={() => deleteSelected()}>Delete</button>
+                    <button onClick={() => deleteAll()}>Delete All</button>
+                    <button onClick={() => copySelected()}>copy</button>
+                    <button onClick={() => DeselectAll()}>DeSelect All</button>
+                    <input type='color' onChange={e => applyColor(e)} />
+
+                    <input size={10} type='text' value={f0} onChange={e => setF0(e.target.value)} />
+
+                    {transformMode.map((val, i) =>
+                        <span key={i}>  <input defaultChecked={(val === 'translate') ? true : false} onClick={e => transform.current.setMode(e.target.value)} type="radio" id={val} value={val} name="transformMode" /><label htmlFor={val}>{val}</label></span>
+                    )}
+                    Texture<input id="importjson" type='file' className='input-file' accept='.png,jpg,.bmp,.jpeg' onChange={e => applyTexture(e.target.files[0])} />
+
+
+                    <button onClick={updatetoCaspar1}>Update to Caspar</button>
+                    <button onClick={resetCamera1}>Reset Camera</button>
+                    <button onClick={loadfabricjstoCasparcg}>Load fabricjs here</button>
+
+                    <button onClick={drawingFileSaveAsgltf}>Scene FileSave As gltf</button>
+                    <label htmlFor='hhh'> orbitcontrolenable: <input id='hhh' type={'checkbox'} checked={orbitcontrolenable} onChange={() => setorbitcontrolenable(!orbitcontrolenable)} /></label>
+                    <button onClick={() => console.log(scene1.children)}>console log</button>
+                    {/* <JSONTree data={scene1.children} />; */}
+
+                </div>
+                <div style={{ height: 650, backgroundColor: 'grey', border: '1px solid red' }} >
+                    <Canvas gl={{ preserveDrawingBuffer: true }}
+                        onCreated={({ gl, raycaster, scene, camera }) => {
+                            setScene1(scene);
+                            setCamera1(camera);
+                            setRaycaster1(raycaster);
+                        }}
+                    >
+                        <SheetProvider sheet={demoSheet}>
+                            <OrbitControls enabled={orbitcontrolenable} />
+                            <TransformControls ref={transform} />
+                            <spotLight position={[10, 15, 10]} angle={10.5} />
+                            <Suspense fallback={null}>
+                            </Suspense>
+                            {[...shapesOnCanvas]}
+                        </SheetProvider>
+                    </Canvas>
+                </div>
             </div>
-
-            <button onClick={addBox} data-shape={"box"}>Box </button>
-            <button onClick={addShape} data-shape={"cylinder"}>Cylinder </button>
-            <button onClick={addShape} data-shape={"donut"}>Donut </button>
-            <button onClick={addShape} data-shape={"sphere"}>sphere </button>
-            {/* <button onClick={addShape} data-shape={"text3d"}>text3d </button> */}
-
-            {/* <button onClick={() => addBox()}>Box</button> */}
-            <button onClick={addDreiText} data-shape={"text3D"}>3D Text</button>
-            <button onClick={() => addDreiText2()}>2D Text</button>
-            <button onClick={() => changetext()}>Change text</button>
-
-
-            <button onClick={() => deleteSelected()}>Delete</button>
-            <button onClick={() => deleteAll()}>Delete All</button>
-            <button onClick={() => copySelected()}>copy</button>
-            <button onClick={() => DeselectAll()}>DeSelect All</button>
-            <input type='color' onChange={e => applyColor(e)} />
-
-            <input size={10} type='text' value={f0} onChange={e => setF0(e.target.value)} />
-
-            {transformMode.map((val, i) =>
-                <span key={i}>  <input defaultChecked={(val === 'translate') ? true : false} onClick={e => transform.current.setMode(e.target.value)} type="radio" id={val} value={val} name="transformMode" /><label htmlFor={val}>{val}</label></span>
-            )}
-            Texture<input id="importjson" type='file' className='input-file' accept='.png,jpg,.bmp,.jpeg' onChange={e => applyTexture(e.target.files[0])} />
-
-
-            <button onClick={updatetoCaspar1}>Update to Caspar</button>
-            <button onClick={resetCamera1}>Reset Camera</button>
-            <button onClick={loadfabricjstoCasparcg}>Load fabricjs here</button>
-
-            <button onClick={drawingFileSaveAsgltf}>Scene FileSave As gltf</button>
-            <label htmlFor='hhh'> orbitcontrolenable: <input id='hhh' type={'checkbox'} checked={orbitcontrolenable} onChange={() => setorbitcontrolenable(!orbitcontrolenable)} /></label>
-            <button onClick={() => console.log(scene1.children)}>console log</button>
-            {/* <JSONTree data={scene1.children} />; */}
-
+            <div style={{ border: '1px solid red' }}>
+                <div style={{ minWidth: 300, backgroundColor: 'darkgrey', border: '1px solid red' }}>  <h3>Props Area</h3> </div>
+                <div style={{ position: 'absolute', top: 475, border: '1px solid red' }}>
+                    gltf file < input id="importjson" type='file' className='input-file' accept='.gltf' onChange={e => importScenefromfilegltf(e.target.files[0])} />
+                    < button onClick={async () => {
+                        const exporter = new GLTFExporter();
+                        exporter.parse(scene1, gltf => {
+                            const inp = JSON.stringify(gltf);
+                            const loader = new GLTFLoader();
+                            loader.parse(inp, "", gltf2 => {
+                                setScene2(gltf2.scene);
+                            });
+                        },
+                            error => {
+                                console.log('An error happened');
+                            },
+                            {}
+                        );
+                    }
+                    }> load above as gltf</button >
+                    <button onClick={updatetoCaspar2}>Update to Caspar</button>
+                    <button onClick={resetCamera2}>Reset Camera</button>
+                    <button onClick={addLight}>Add light</button>
+                    <button onClick={() => console.log(scene2)}>console log</button>
+                </div>
+                <div style={{ position: 'absolute', top: 575, minWidth: 200, height: 150, backgroundColor: 'grey', border: '1px solid red' }} >
+                    <Canvas onCreated={({ gl, raycaster, scene, camera }) => {
+                        setCamera2(camera);
+                    }}
+                    >
+                        <OrbitControls />
+                        {scene2 && <primitive object={scene2} />}
+                    </Canvas>
+                </div>
+            </div>
+        </div >
+        <div style={{ textAlign: 'center', minHeight: 220, border: '1px solid red' }}>
+            <h1>Timeline Area</h1>
         </div>
-        <div style={{ width: 880, height: 450, backgroundColor: 'grey' }} >
-            <Canvas gl={{ preserveDrawingBuffer: true }}
-                onCreated={({ gl, raycaster, scene, camera }) => {
-                    setScene1(scene);
-                    setCamera1(camera);
-                    setRaycaster1(raycaster);
-                }}
-            >
-                <SheetProvider sheet={demoSheet}>
-                    <OrbitControls enabled={orbitcontrolenable} />
-                    <TransformControls ref={transform} />
-                    <spotLight position={[10, 15, 10]} angle={10.5} />
-                    <Suspense fallback={null}>
-                    </Suspense>
-                    {[...shapesOnCanvas]}
-                </SheetProvider>
-            </Canvas>
-        </div>
-
-        gltf file < input id="importjson" type='file' className='input-file' accept='.gltf' onChange={e => importScenefromfilegltf(e.target.files[0])} />
-        < button onClick={async () => {
-            const exporter = new GLTFExporter();
-            exporter.parse(scene1, gltf => {
-                const inp = JSON.stringify(gltf);
-                const loader = new GLTFLoader();
-                loader.parse(inp, "", gltf2 => {
-                    setScene2(gltf2.scene);
-                });
-            },
-                error => {
-                    console.log('An error happened');
-                },
-                {}
-            );
-        }
-        }> load above as gltf</button >
-        <button onClick={updatetoCaspar2}>Update to Caspar</button>
-        <button onClick={resetCamera2}>Reset Camera</button>
-        <button onClick={addLight}>Add light</button>
-        <button onClick={() => console.log(scene2)}>console log</button>
-        <div style={{ width: 880, height: 300, backgroundColor: 'grey' }} >
-
-
-            <Canvas onCreated={({ gl, raycaster, scene, camera }) => {
-                setCamera2(camera);
-            }}
-            >
-                <OrbitControls />
-                {scene2 && <primitive object={scene2} />}
-
-            </Canvas>
-
-        </div>
-    </div >
-    )
+    </div>)
 }
 export default Threejs;
