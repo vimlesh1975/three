@@ -4,7 +4,7 @@ import { OrbitControls, TransformControls } from "@react-three/drei";
 import * as THREE from 'three'
 import React, { useEffect } from 'react'
 // import boldUrl from 'three/examples/fonts/helvetiker_bold.typeface.json'
-// import { Text3D } from '@react-three/drei'
+// import { Text3D, Text, Html } from '@react-three/drei'
 import { endpoint } from './common'
 import { useRef, Suspense, useState } from 'react';
 import * as STDLIB from 'three-stdlib'
@@ -15,11 +15,12 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 // import { JSONTree } from 'react-json-tree';
 // import boldUrl from 'three/examples/fonts/helvetiker_bold.typeface.json'
+// import boldUrl2 from './helvetiker_regular.typeface.json'
 import { getProject } from '@theatre/core'
 
 import studio from '@theatre/studio'
 import extension from '@theatre/r3f/dist/extension'
-import { editable as e, SheetProvider } from '@theatre/r3f'
+import { editable as e, SheetProvider, RefreshSnapshot, useCurrentSheet } from '@theatre/r3f'
 // import projectState from './state.json'
 
 studio.initialize()
@@ -33,9 +34,9 @@ const transformMode = ["scale", "rotate", "translate"];
 var intersects;
 
 const Threejs = () => {
-    useEffect(() => {
-        demoSheet.sequence.play({ iterationCount: Infinity, range: [0, 1] })
-    }, [])
+    // useEffect(() => {
+    //     demoSheet.sequence.play({ iterationCount: Infinity, range: [0, 1] })
+    // }, [])
 
     const [scene1, setScene1] = useState({});
     const [scene2, setScene2] = useState({});
@@ -71,8 +72,12 @@ const Threejs = () => {
                 {...props}
                 ref={mesh}
                 scale={[1.5, 1.5, 1.5]}
-                onPointerOver={e => console.log('hover')}
-                onPointerOut={e => console.log('unhover')}
+                onPointerOver={e => {
+                    e.object.material.emissive.r = 1;
+                }}
+                onPointerOut={e => {
+                    e.object.material.emissive.r = 0;
+                }}
             >
                 <primitive object={allShapes[props.shape]} attach={"geometry"} />
                 <meshStandardMaterial color={allColors[props.shape]} />
@@ -83,7 +88,13 @@ const Threejs = () => {
     const Shapetext3D = (props) => {
         const mesh = useRef();
         return (
-            <e.mesh {...props} ref={mesh} >
+            <e.mesh {...props} ref={mesh}
+                onPointerOver={e => {
+                    e.object.material.emissive.r = 1;
+                }}
+                onPointerOut={e => {
+                    e.object.material.emissive.r = 0;
+                }} >
                 <primitive object={props.geometry} attach={"geometry"} />
                 <meshStandardMaterial color={props.color} />
             </e.mesh>
@@ -93,7 +104,12 @@ const Threejs = () => {
     const Shapetext2D = (props) => {
         const mesh = useRef();
         return (
-            <e.mesh {...props} ref={mesh} >
+            <e.mesh {...props} ref={mesh} onPointerOver={e => {
+                e.object.material.emissive && (e.object.material.emissive.r = 1);
+            }}
+                onPointerOut={e => {
+                    e.object.material.emissive && (e.object.material.emissive.r = 0);
+                }}>
                 <primitive object={props.geometry} attach={"geometry"} />
                 <primitive object={props.material} attach={"material"} />
             </e.mesh>
@@ -103,7 +119,12 @@ const Threejs = () => {
     const Shapefabricjs = (props) => {
         const mesh = useRef();
         return (
-            <e.mesh {...props} ref={mesh} >
+            <e.mesh {...props} ref={mesh} onPointerOver={e => {
+                e.object.material.emissive && (e.object.material.emissive.r = 1)
+            }}
+                onPointerOut={e => {
+                    e.object.material.emissive && (e.object.material.emissive.r = 0)
+                }}>
                 <primitive object={props.geometry} attach={"geometry"} />
                 <primitive object={props.material} attach={"material"} />
             </e.mesh>
@@ -129,6 +150,39 @@ const Threejs = () => {
             ]
         )
     }
+    const [imported1, setImported1] = useState([])
+
+    const addImportedShape = (shape, mesh1, i) => {
+        const shapeCount = shapesOnCanvas.length
+        imported1.push(
+            <ShapeImported
+                shape={shape}
+                key={shapeCount + i}
+                theatreKey={shape + shapeCount + i}
+                position={mesh1.position}
+                rotation={mesh1.rotation}
+                scale={mesh1.scale}
+                geometry={mesh1.geometry}
+                material={mesh1.material}
+            />
+        )
+    }
+
+    const ShapeImported = (props) => {
+        const mesh = useRef();
+        return (<>
+            <e.mesh {...props} ref={mesh} onPointerOver={e => {
+                e.object.material.emissive && (e.object.material.emissive.r = 1)
+            }}
+                onPointerOut={e => {
+                    e.object.material.emissive && (e.object.material.emissive.r = 0)
+                }}>
+                <primitive object={props.geometry} attach={"geometry"} />
+                <primitive object={props.material} attach={"material"} />
+            </e.mesh>
+        </>)
+    }
+
     useEffect(() => {
         if (scene1?.children) {
             const aa = [...scene1.children];
@@ -202,6 +256,24 @@ const Threejs = () => {
             const loader = new GLTFLoader();
             loader.load(e.target.result, function (gltf) {
                 setScene2(gltf.scene);
+            });
+        }
+        reader.readAsDataURL(inp);
+    }
+
+    function importScenefromfilegltftoscene1(inp) {
+        var reader = new FileReader();
+        reader.onload = e => {
+            const loader = new GLTFLoader();
+            loader.load(e.target.result, (gltf) => {
+                (gltf.scene.children).forEach((element, i) => {
+                    console.log(element);
+                    if (element.type === 'Mesh') {
+                        addImportedShape("imported", element, i)
+                    }
+                })
+                setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+                setImported1([]);
             });
         }
         reader.readAsDataURL(inp);
@@ -403,8 +475,12 @@ const Threejs = () => {
 
     const deleteSelected = () => {
         if (intersects[0]) {
-            scene1.children[2].detach()
-            scene1.remove(intersects[0].object);
+            scene1.children[2].detach();
+            const updatedshapesOnCanvas = [...shapesOnCanvas];
+            const bb = updatedshapesOnCanvas.filter((val, i) => {
+                return (intersects[0].object.userData.__storeKey !== "Demo Sheet:default:" + updatedshapesOnCanvas[i].props.theatreKey)
+            })
+            setShapesOnCanvas(bb);
             const updatedpickableObjects = [...pickableObjects]
             updatedpickableObjects.filter((val) => {
                 return (val !== intersects[0].object)
@@ -414,11 +490,14 @@ const Threejs = () => {
         }
     }
     const deleteAll = () => {
-        // setPickableObjects([]);
-        // setSelectedObject(null);
-        pickableObjects.forEach((object) => {
-            scene1.remove(object);
-        })
+
+        // pickableObjects.forEach((object) => {
+        //     scene1.remove(object);
+        // })
+        scene1.children[2].detach();
+        setPickableObjects([]);
+        setSelectedObject(null);
+        setShapesOnCanvas([])
     }
 
     const DeselectAll = () => {
@@ -482,15 +561,13 @@ const Threejs = () => {
                     <button onClick={addShape} data-shape={"cylinder"}>Cylinder </button>
                     <button onClick={addShape} data-shape={"donut"}>Donut </button>
                     <button onClick={addShape} data-shape={"sphere"}>sphere </button>
-                    {/* <button onClick={addShape} data-shape={"text3d"}>text3d </button> */}
 
-                    {/* <button onClick={() => addBox()}>Box</button> */}
                     <button onClick={addDreiText} data-shape={"text3D"}>3D Text</button>
                     <button onClick={() => addDreiText2()}>2D Text</button>
                     <button onClick={() => changetext()}>Change text</button>
 
 
-                    <button onClick={() => deleteSelected()}>Delete</button>
+                    <button onClick={deleteSelected}>Delete</button>
                     <button onClick={() => deleteAll()}>Delete All</button>
                     <button onClick={() => copySelected()}>copy</button>
                     <button onClick={() => DeselectAll()}>DeSelect All</button>
@@ -508,9 +585,14 @@ const Threejs = () => {
                     <button onClick={resetCamera1}>Reset Camera</button>
                     <button onClick={loadfabricjstoCasparcg}>Load fabricjs here</button>
 
-                    <button onClick={drawingFileSaveAsgltf}>Scene FileSave As gltf</button>
+                    <button onClick={drawingFileSaveAsgltf}>FileSave As gltf</button>
+                    Open gltf file: < input id="importjson" type='file' className='input-file' accept='.gltf' onChange={e => importScenefromfilegltftoscene1(e.target.files[0])} />
                     <label htmlFor='hhh'> orbitcontrolenable: <input id='hhh' type={'checkbox'} checked={orbitcontrolenable} onChange={() => setorbitcontrolenable(!orbitcontrolenable)} /></label>
-                    <button onClick={() => console.log(scene1.children)}>console log</button>
+                    <button onClick={() => {
+                        console.log(scene1.children);
+                        console.log(imported1);
+
+                    }}>console log</button>
                     {/* <JSONTree data={scene1.children} />; */}
 
                 </div>
@@ -527,8 +609,21 @@ const Threejs = () => {
                             <TransformControls ref={transform} />
                             <spotLight position={[10, 15, 10]} angle={10.5} />
                             <Suspense fallback={null}>
+                                {/* <Text color="black" anchorX="center" anchorY="middle">
+                                    hello world!
+                                </Text> */}
+                                {/* <Text font={boldUrl2} characters="abcdefghijklmnopqrstuvwxyz0123456789!">
+                                    hello world!
+                                </Text> */}
+                                {/* <Text3D font={boldUrl2} >
+                                    Hello world!
+                                    <meshNormalMaterial />
+                                </Text3D> */}
+                                {/* <Html occlude ><h1>hello </h1> </Html> */}
+
+                                {shapesOnCanvas}
+
                             </Suspense>
-                            {[...shapesOnCanvas]}
                         </SheetProvider>
                     </Canvas>
                 </div>
