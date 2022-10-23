@@ -389,7 +389,7 @@ const Threejs = () => {
 
     const addDreiText = () => {
         var loader = new FontLoader();
-        loader.load(window.location.origin + "/ReactCasparClient/helvetiker_regular.typeface.json", function (font) {
+        loader.load(window.location.origin + "/three/helvetiker_regular.typeface.json", function (font) {
             var geometry = new STDLIB.TextGeometry(f0, {
                 font: font,
                 size: 1.2,
@@ -467,9 +467,18 @@ const Threejs = () => {
         if (intersects[0]) {
             var aa = intersects[0].object.clone();
             aa.position.set(2, 2, 2); // or any other coordinates
-            scene1.add(aa);
+
+            addImportedShape("copied", intersects[0].object, 0);
+            setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+            setImported1([]);
+            // scene1.add(aa);
             setPickableObjects([...pickableObjects, aa]);
             setSelectedObject(aa);
+
+            const updatedshapesOnCanvas = [...shapesOnCanvas];
+            const bb = updatedshapesOnCanvas.filter((val, i) => {
+                return (intersects[0].object.userData.__storeKey === "Demo Sheet:default:" + updatedshapesOnCanvas[i].props.theatreKey)
+            })
         }
     }
 
@@ -590,8 +599,6 @@ const Threejs = () => {
                     <label htmlFor='hhh'> orbitcontrolenable: <input id='hhh' type={'checkbox'} checked={orbitcontrolenable} onChange={() => setorbitcontrolenable(!orbitcontrolenable)} /></label>
                     <button onClick={() => {
                         console.log(scene1.children);
-                        console.log(imported1);
-
                     }}>console log</button>
                     {/* <JSONTree data={scene1.children} />; */}
 
