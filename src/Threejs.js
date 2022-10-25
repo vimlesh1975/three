@@ -521,6 +521,48 @@ const Threejs = () => {
         }
     }
 
+    const bbb = () => {
+        //create a keyframe track (i.e. a timed sequence of keyframes) for each animated property
+        // Note: the keyframe track type should correspond to the type of the property being animated
+
+        // POSITION
+        var positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1, 2], [0, 0, 0, 30, 0, 0, 0, 0, 0]);
+
+        // SCALE
+        var scaleKF = new THREE.VectorKeyframeTrack('.scale', [0, 1, 2], [1, 1, 1, 2, 2, 2, 1, 1, 1]);
+
+        // ROTATION
+        // Rotation should be performed using quaternions, using a QuaternionKeyframeTrack
+        // Interpolating Euler angles (.rotation property) can be problematic and is currently not supported
+
+        // set up rotation about x axis
+        var xAxis = new THREE.Vector3(1, 0, 0);
+
+        var qInitial = new THREE.Quaternion().setFromAxisAngle(xAxis, 0);
+        var qFinal = new THREE.Quaternion().setFromAxisAngle(xAxis, Math.PI);
+        var quaternionKF = new THREE.QuaternionKeyframeTrack('.quaternion', [0, 1, 2], [qInitial.x, qInitial.y, qInitial.z, qInitial.w, qFinal.x, qFinal.y, qFinal.z, qFinal.w, qInitial.x, qInitial.y, qInitial.z, qInitial.w]);
+
+        // COLOR
+        var colorKF = new THREE.ColorKeyframeTrack('.material.color', [0, 1, 2], [1, 0, 0, 0, 1, 0, 0, 0, 1], THREE.InterpolateDiscrete);
+
+        // OPACITY
+        var opacityKF = new THREE.NumberKeyframeTrack('.material.opacity', [0, 1, 2], [1, 0, 1]);
+
+        // create an animation sequence with the tracks
+        // If a negative time value is passed, the duration will be calculated from the times of the passed tracks array
+        var clip = new THREE.AnimationClip('Action', 3, [scaleKF, positionKF, quaternionKF, colorKF, opacityKF]);
+
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
+        scene1.add(mesh)
+
+        // setup the AnimationMixer
+        var mixer = new THREE.AnimationMixer(mesh);
+
+        // create a ClipAction and set it to play
+        var clipAction = mixer.clipAction(clip);
+        clipAction.play();
+    }
+
     useEffect(() => {
         document.addEventListener('click', onDocumentMouseMove, false);
         return () => {
@@ -576,6 +618,8 @@ const Threejs = () => {
                     <button onClick={() => {
                         console.log(scene1.children);
                     }}>console log</button>
+
+                    <button on onClick={bbb}> Test</button>
                     {/* <JSONTree data={scene1.children} />; */}
 
                 </div>
