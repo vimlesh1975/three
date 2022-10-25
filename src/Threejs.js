@@ -1,6 +1,6 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, TransformControls } from "@react-three/drei";
-
+import { v4 as uuidv4 } from 'uuid';
 import * as THREE from 'three'
 import React, { useEffect } from 'react'
 // import boldUrl from 'three/examples/fonts/helvetiker_bold.typeface.json'
@@ -20,7 +20,7 @@ import { getProject } from '@theatre/core'
 
 import studio from '@theatre/studio'
 import extension from '@theatre/r3f/dist/extension'
-import { editable as e, SheetProvider, RefreshSnapshot, useCurrentSheet } from '@theatre/r3f'
+import { editable as e, SheetProvider } from '@theatre/r3f'
 // import projectState from './state.json'
 
 studio.initialize()
@@ -163,7 +163,7 @@ const Threejs = () => {
                 rotation={mesh1.rotation}
                 scale={mesh1.scale}
                 geometry={mesh1.geometry}
-                material={mesh1.material}
+                material={mesh1.material.clone()}
             />
         )
     }
@@ -184,22 +184,19 @@ const Threejs = () => {
     }
 
     useEffect(() => {
-        if (scene1?.children) {
+        scene1?.children && scene1?.children[2].detach();
+        if (scene1?.children?.length > 3) {
             const aa = [...scene1.children];
             aa.splice(0, 3)
-            console.log(aa)
             setPickableObjects(aa);
-            if (shapesOnCanvas.length > 0) {
-                scene1.children[2].attach(scene1.children[scene1.children.length - 1])
-                setSelectedObject(scene1.children[scene1.children.length - 1])
-            }
+            scene1.children[2].attach(scene1.children[scene1.children.length - 1])
+            setSelectedObject(scene1.children[scene1.children.length - 1])
         }
-
         return () => {
             // second
         }
 
-    }, [shapesOnCanvas.length, scene1?.children?.length])
+    }, [scene1?.children?.length])
 
 
     const showToCasparcg = () => {
@@ -438,8 +435,6 @@ const Threejs = () => {
         )
     }
 
-
-
     const addDreiText2 = () => {
         const dreiText2 = STDLIB.createText(f0, 1.5)
         const shapeCount = shapesOnCanvas.length
@@ -459,29 +454,15 @@ const Threejs = () => {
                 />
             ]
         )
-
     }
-
 
     const copySelected = () => {
-        if (intersects[0]) {
-            var aa = intersects[0].object.clone();
-            aa.position.set(2, 2, 2); // or any other coordinates
-
-            addImportedShape("copied", intersects[0].object, 0);
+        if (selectedObject) {
+            addImportedShape("copied", selectedObject, 4545);
             setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
             setImported1([]);
-            // scene1.add(aa);
-            setPickableObjects([...pickableObjects, aa]);
-            setSelectedObject(aa);
-
-            const updatedshapesOnCanvas = [...shapesOnCanvas];
-            const bb = updatedshapesOnCanvas.filter((val, i) => {
-                return (intersects[0].object.userData.__storeKey === "Demo Sheet:default:" + updatedshapesOnCanvas[i].props.theatreKey)
-            })
         }
     }
-
     const deleteSelected = () => {
         if (intersects[0]) {
             scene1.children[2].detach();
@@ -499,10 +480,6 @@ const Threejs = () => {
         }
     }
     const deleteAll = () => {
-
-        // pickableObjects.forEach((object) => {
-        //     scene1.remove(object);
-        // })
         scene1.children[2].detach();
         setPickableObjects([]);
         setSelectedObject(null);
