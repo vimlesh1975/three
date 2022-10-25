@@ -1,6 +1,5 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, TransformControls } from "@react-three/drei";
-import { v4 as uuidv4 } from 'uuid';
 import * as THREE from 'three'
 import React, { useEffect } from 'react'
 // import boldUrl from 'three/examples/fonts/helvetiker_bold.typeface.json'
@@ -195,7 +194,7 @@ const Threejs = () => {
         return () => {
             // second
         }
-
+        // eslint-disable-next-line
     }, [scene1?.children?.length])
 
 
