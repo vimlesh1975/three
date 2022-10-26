@@ -3,7 +3,6 @@ import { OrbitControls, TransformControls } from "@react-three/drei";
 import * as THREE from 'three'
 
 import { DragControls } from 'three/examples/jsm/controls/DragControls'
-import Stats from 'three/examples/jsm/libs/stats.module'
 
 import React, { useEffect } from 'react'
 // import boldUrl from 'three/examples/fonts/helvetiker_bold.typeface.json'
@@ -26,7 +25,7 @@ import extension from '@theatre/r3f/dist/extension'
 import { editable as e, SheetProvider } from '@theatre/r3f'
 // import projectState from './state.json'
 
-// studio.extend(extension);
+studio.extend(extension);
 
 
 const demoSheet = getProject('Demo Project').sheet('Demo Sheet')
@@ -193,7 +192,15 @@ const Threejs = () => {
 
     useEffect(() => {
         studio.initialize();
+        return () => {
+            // studio.hide();
+        }
+    }, [])
+
+
+    useEffect(() => {
         var dragControls;
+        var transformCurrent = transform.current;
         if (pickableObjects.length > 0) {
             dragControls = new DragControls(pickableObjects, camera1, gl1?.domElement);
             dragControls.addEventListener('dragstart', function (event) {
@@ -202,7 +209,7 @@ const Threejs = () => {
             dragControls.addEventListener('dragend', function (event) {
                 setorbitcontrolenable(true);
             });
-            transform.current.addEventListener('dragging-changed', function (event) {
+            transformCurrent.addEventListener('dragging-changed', function (event) {
                 setorbitcontrolenable(!event.value)
             })
         }
@@ -210,9 +217,10 @@ const Threejs = () => {
             if (pickableObjects.length > 0) {
                 dragControls.removeEventListener('dragstart', false);
                 dragControls.removeEventListener('dragend', false);
-                transform.current.removeEventListener('dragging-changed', false);
+                transformCurrent.removeEventListener('dragging-changed', false);
             }
         }
+        // eslint-disable-next-line 
     }, [pickableObjects])
 
 
@@ -579,7 +587,7 @@ const Threejs = () => {
                 <div style={{ border: '1px solid red' }}>
                     <div style={{ border: '1px solid red' }}>
                         Casparc Control
-                        <button onClick={() => window.open("/ReactCasparClient/threejs")}> Opebn Full Window</button>
+                        {/* <button onClick={() => window.open("/ReactCasparClient/threejs")}> Opebn Full Window</button> */}
                         <button onClick={showToCasparcg}>Initialise casparcg</button>
                         <button onClick={resetCameraToCasparc}>caspar camera Reset</button>
 
