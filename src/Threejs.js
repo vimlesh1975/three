@@ -1,6 +1,10 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, TransformControls } from "@react-three/drei";
 import * as THREE from 'three'
+
+import { DragControls } from 'three/examples/jsm/controls/DragControls'
+import Stats from 'three/examples/jsm/libs/stats.module'
+
 import React, { useEffect } from 'react'
 // import boldUrl from 'three/examples/fonts/helvetiker_bold.typeface.json'
 // import { Text3D, Text, Html } from '@react-three/drei'
@@ -22,8 +26,8 @@ import extension from '@theatre/r3f/dist/extension'
 import { editable as e, SheetProvider } from '@theatre/r3f'
 // import projectState from './state.json'
 
-studio.initialize()
-studio.extend(extension)
+// studio.extend(extension);
+
 
 const demoSheet = getProject('Demo Project').sheet('Demo Sheet')
 // const demoSheet = getProject('Demo Project', { state: projectState }).sheet('Demo Sheet')
@@ -33,6 +37,9 @@ const transformMode = ["scale", "rotate", "translate"];
 var intersects;
 
 const Threejs = () => {
+
+
+
     // useEffect(() => {
     //     demoSheet.sequence.play({ iterationCount: Infinity, range: [0, 1] })
     // }, [])
@@ -182,20 +189,50 @@ const Threejs = () => {
         </>)
     }
 
+    const [gl1, setGl1] = useState()
+
     useEffect(() => {
-        scene1?.children && scene1?.children[2].detach();
-        if (scene1?.children?.length > 3) {
-            const aa = [...scene1.children];
-            aa.splice(0, 3)
-            setPickableObjects(aa);
-            scene1.children[2].attach(scene1.children[scene1.children.length - 1])
-            setSelectedObject(scene1.children[scene1.children.length - 1])
+        studio.initialize();
+        var dragControls;
+        if (pickableObjects.length > 0) {
+            dragControls = new DragControls(pickableObjects, camera1, gl1?.domElement);
+            dragControls.addEventListener('dragstart', function (event) {
+                setorbitcontrolenable(false);
+            });
+            dragControls.addEventListener('dragend', function (event) {
+                setorbitcontrolenable(true);
+            });
+            transform.current.addEventListener('dragging-changed', function (event) {
+                setorbitcontrolenable(!event.value)
+            })
         }
+        return () => {
+            if (pickableObjects.length > 0) {
+                dragControls.removeEventListener('dragstart', false);
+                dragControls.removeEventListener('dragend', false);
+                transform.current.removeEventListener('dragging-changed', false);
+            }
+        }
+    }, [pickableObjects])
+
+
+    useEffect(() => {
+        setTimeout(() => {
+            scene1?.children && scene1?.children[2].detach();
+            if (scene1?.children?.length > 3) {
+                const aa = [...scene1.children];
+                aa.splice(0, 3)
+                setPickableObjects(aa);
+                scene1.children[2].attach(scene1.children[scene1.children.length - 1])
+                setSelectedObject(scene1.children[scene1.children.length - 1])
+            }
+        }, 100);
+
         return () => {
             // second
         }
-        // eslint-disable-next-line
-    }, [scene1?.children?.length])
+        // eslint-disable-next-line 
+    }, [shapesOnCanvas])
 
 
     const showToCasparcg = () => {
@@ -334,6 +371,12 @@ const Threejs = () => {
             {}
         );
     }
+
+    const dddd = () => {
+        // console.log(demoSheet.sequence)
+        demoSheet.sequence.play({ rate: 10 })
+    }
+    window.demoSheet = demoSheet;
 
     async function downloadJSON(gltf) {
         const element = document.createElement("a");
@@ -521,48 +564,6 @@ const Threejs = () => {
         }
     }
 
-    const bbb = () => {
-        //create a keyframe track (i.e. a timed sequence of keyframes) for each animated property
-        // Note: the keyframe track type should correspond to the type of the property being animated
-
-        // POSITION
-        var positionKF = new THREE.VectorKeyframeTrack('.position', [0, 1, 2], [0, 0, 0, 30, 0, 0, 0, 0, 0]);
-
-        // SCALE
-        var scaleKF = new THREE.VectorKeyframeTrack('.scale', [0, 1, 2], [1, 1, 1, 2, 2, 2, 1, 1, 1]);
-
-        // ROTATION
-        // Rotation should be performed using quaternions, using a QuaternionKeyframeTrack
-        // Interpolating Euler angles (.rotation property) can be problematic and is currently not supported
-
-        // set up rotation about x axis
-        var xAxis = new THREE.Vector3(1, 0, 0);
-
-        var qInitial = new THREE.Quaternion().setFromAxisAngle(xAxis, 0);
-        var qFinal = new THREE.Quaternion().setFromAxisAngle(xAxis, Math.PI);
-        var quaternionKF = new THREE.QuaternionKeyframeTrack('.quaternion', [0, 1, 2], [qInitial.x, qInitial.y, qInitial.z, qInitial.w, qFinal.x, qFinal.y, qFinal.z, qFinal.w, qInitial.x, qInitial.y, qInitial.z, qInitial.w]);
-
-        // COLOR
-        var colorKF = new THREE.ColorKeyframeTrack('.material.color', [0, 1, 2], [1, 0, 0, 0, 1, 0, 0, 0, 1], THREE.InterpolateDiscrete);
-
-        // OPACITY
-        var opacityKF = new THREE.NumberKeyframeTrack('.material.opacity', [0, 1, 2], [1, 0, 1]);
-
-        // create an animation sequence with the tracks
-        // If a negative time value is passed, the duration will be calculated from the times of the passed tracks array
-        var clip = new THREE.AnimationClip('Action', 3, [scaleKF, positionKF, quaternionKF, colorKF, opacityKF]);
-
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial());
-        scene1.add(mesh)
-
-        // setup the AnimationMixer
-        var mixer = new THREE.AnimationMixer(mesh);
-
-        // create a ClipAction and set it to play
-        var clipAction = mixer.clipAction(clip);
-        clipAction.play();
-    }
-
     useEffect(() => {
         document.addEventListener('click', onDocumentMouseMove, false);
         return () => {
@@ -619,9 +620,7 @@ const Threejs = () => {
                         console.log(scene1.children);
                     }}>console log</button>
 
-                    <button on onClick={bbb}> Test</button>
-                    {/* <JSONTree data={scene1.children} />; */}
-
+                    <button onClick={dddd}>Test4</button>
                 </div>
                 <div style={{ height: 650, backgroundColor: 'grey', border: '1px solid red' }} >
                     <Canvas gl={{ preserveDrawingBuffer: true }}
@@ -629,12 +628,13 @@ const Threejs = () => {
                             setScene1(scene);
                             setCamera1(camera);
                             setRaycaster1(raycaster);
+                            setGl1(gl)
                         }}
                     >
                         <SheetProvider sheet={demoSheet}>
-                            <OrbitControls enabled={orbitcontrolenable} />
-                            <TransformControls ref={transform} />
-                            <spotLight position={[10, 15, 10]} angle={10.5} />
+                            <OrbitControls enabled={orbitcontrolenable} theatreKey='orb 1' />
+                            <TransformControls ref={transform} theatreKey='transformControls 1' />
+                            <e.spotLight position={[10, 15, 10]} angle={10.5} theatreKey='spotLight 1' />
                             <Suspense fallback={null}>
                                 {/* <Text color="black" anchorX="center" anchorY="middle">
                                     hello world!
@@ -650,6 +650,15 @@ const Threejs = () => {
 
                                 {shapesOnCanvas}
 
+                                {/* {dd.map((val, i) => {
+                                    return (<>
+                                        <e.mesh key={i} theatreKey={val}>
+                                            <primitive object={new THREE.BoxGeometry(1, 1, 1)} attach={"geometry"} />
+                                            <primitive object={new THREE.MeshStandardMaterial({ color: 'red' })} attach={"material"} />
+                                        </e.mesh>
+                                    </>)
+                                }
+                                )} */}
                             </Suspense>
                         </SheetProvider>
                     </Canvas>
@@ -694,6 +703,6 @@ const Threejs = () => {
         <div style={{ textAlign: 'center', minHeight: 220, border: '1px solid red' }}>
             <h1>Timeline Area</h1>
         </div>
-    </div>)
+    </div >)
 }
 export default Threejs;
