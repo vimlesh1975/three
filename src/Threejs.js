@@ -1,6 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, TransformControls } from "@react-three/drei";
-import * as THREE from 'three'
+import * as THREE from 'three';
+import { NumberKeyframeTrack, VectorKeyframeTrack, AnimationClip, AnimationMixer } from "three";
 import axios from 'axios';
 import socketIOClient from "socket.io-client";
 
@@ -55,6 +56,27 @@ const Threejs = () => {
     const [pickableObjects, setPickableObjects] = useState([])
     const [selectedObject, setSelectedObject] = useState();
     const [shapesOnCanvas, setShapesOnCanvas] = useState([])
+    var action;
+    const sampleAnimation = (mesh) => {
+        console.log(mesh)
+        const opacityKF = new NumberKeyframeTrack(".material.opacity", [0, 1, 2, 3, 4], [0, 1, 0, 1, 0]);
+        const positionKF = new VectorKeyframeTrack(".position", [0, 3, 4], [0, 0, 0, 2, 2, 2, 0, 0, 0]);
+        const moveBlinkClip = new AnimationClip("move-n-blink", -1, [
+            positionKF,
+            opacityKF,
+        ]);
+        const mixer = new AnimationMixer(mesh);
+        action = mixer.clipAction(moveBlinkClip);
+        action.play();
+        const clock = new THREE.Clock();
+        const aa = () => {
+            mixer.update(clock.getDelta());
+            requestAnimationFrame(aa);
+        }
+        aa();
+    }
+    const stop1 = () => action.stop();
+
 
     const Shape = (props) => {
 
@@ -800,6 +822,8 @@ const Threejs = () => {
 
                     <button onClick={playAnimation}>Play Animation</button>
                     <button onClick={pauseAnimation}>Pause Animation</button>
+                    <button onClick={() => sampleAnimation(selectedObject)}>Play Sample Animation</button>
+                    <button onClick={() => stop1()}>Stop Sample Animation</button>
                 </div>
                 <div style={{ height: 650, backgroundColor: 'grey', border: '1px solid red' }} >
                     <Canvas gl={{ preserveDrawingBuffer: true }}
