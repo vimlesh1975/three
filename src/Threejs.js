@@ -1,6 +1,8 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, TransformControls } from "@react-three/drei";
 import * as THREE from 'three'
+import axios from 'axios';
+import socketIOClient from "socket.io-client";
 
 import { DragControls } from 'three/examples/jsm/controls/DragControls'
 
@@ -12,7 +14,6 @@ import { useRef, Suspense, useState } from 'react';
 import * as STDLIB from 'three-stdlib'
 
 import { GLTFExporter } from './GLTFExporter.js';
-
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 // import { JSONTree } from 'react-json-tree';
@@ -36,9 +37,6 @@ const transformMode = ["scale", "rotate", "translate"];
 var intersects;
 
 const Threejs = () => {
-
-
-
     // useEffect(() => {
     //     demoSheet.sequence.play({ iterationCount: Infinity, range: [0, 1] })
     // }, [])
@@ -56,6 +54,7 @@ const Threejs = () => {
     const [orbitcontrolenable, setorbitcontrolenable] = useState(false)
     const [pickableObjects, setPickableObjects] = useState([])
     const [selectedObject, setSelectedObject] = useState();
+    const [shapesOnCanvas, setShapesOnCanvas] = useState([])
 
     const Shape = (props) => {
 
@@ -85,7 +84,7 @@ const Threejs = () => {
                 }}
             >
                 <primitive object={allShapes[props.shape]} attach={"geometry"} />
-                <meshStandardMaterial color={allColors[props.shape]} />
+                <meshStandardMaterial color={allColors[props.shape]} roughness={0.3} metalness={0.8} />
             </e.mesh>
         );
     }
@@ -137,8 +136,41 @@ const Threejs = () => {
     }
 
 
-    const [shapesOnCanvas, setShapesOnCanvas] = useState([])
+    useEffect(() => {
+        const socket = socketIOClient(':9000');
+        socket.on("setCurrentCanvas", data => {
+            // setCurrentCanvas(data.data1);
+            const geometry = new THREE.BoxGeometry(7, 4, 5);
+            const material = new THREE.MeshBasicMaterial({
+                roughness: 0.3, metalness: 0.8,
+                transparent: true,
+                map: new THREE.TextureLoader().load(data.data1, (texture) => {
+                    // console.log(texture)
+                    const shapeCount = shapesOnCanvas.length
+                    const shape = "fabricjs"
+                    setShapesOnCanvas(
+                        [
+                            ...shapesOnCanvas,
+                            <Shapefabricjs
+                                shape={shape}
+                                key={shapeCount}
+                                geometry={geometry}
+                                material={material}
+                                // scale={[0.64, 0.54, 1]}
+                                // position={[0, -3, 0.27]}
+                                theatreKey={shape + shapeCount}
+                            />
+                        ]
+                    )
+                })
+            });
+        }
+        )
 
+        return () => {
+            // second
+        }
+    }, [shapesOnCanvas])
 
     const addShape = (e) => {
         const shapeCount = shapesOnCanvas.length
@@ -162,7 +194,7 @@ const Threejs = () => {
         imported1.push(
             <ShapeImported
                 shape={shape}
-                key={shapeCount + i}
+                key={shapeCount}
                 theatreKey={shape + shapeCount + i}
                 position={mesh1.position}
                 rotation={mesh1.rotation}
@@ -210,7 +242,7 @@ const Threejs = () => {
                 setorbitcontrolenable(true);
             });
             transformCurrent.addEventListener('dragging-changed', function (event) {
-                setorbitcontrolenable(!event.value)
+                setorbitcontrolenable(!event.value);
             })
         }
         return () => {
@@ -226,12 +258,12 @@ const Threejs = () => {
 
     useEffect(() => {
         setTimeout(() => {
-            scene1?.children && scene1?.children[2].detach();
-            if (scene1?.children?.length > 3) {
+            scene1?.children && scene1?.children[3].detach();
+            if (scene1?.children?.length > 4) {
                 const aa = [...scene1.children];
-                aa.splice(0, 3)
+                aa.splice(0, 4)
                 setPickableObjects(aa);
-                scene1.children[2].attach(scene1.children[scene1.children.length - 1])
+                scene1.children[3].attach(scene1.children[scene1.children.length - 1])
                 setSelectedObject(scene1.children[scene1.children.length - 1])
             }
         }, 100);
@@ -328,7 +360,7 @@ const Threejs = () => {
                 var loader = new THREE.TextureLoader();
                 loader.crossOrigin = "";
                 loader.load(e.target.result, texture => {
-                    const material = new THREE.MeshBasicMaterial({ map: texture, color: 'grey' });
+                    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
                     selectedObject.material = material;
                     selectedObject.material.map.needsUpdate = true;
                 }, () => { }, error => {
@@ -380,9 +412,11 @@ const Threejs = () => {
         );
     }
 
-    const dddd = () => {
-        // console.log(demoSheet.sequence)
-        demoSheet.sequence.play({ rate: 10 })
+    const playAnimation = () => {
+        demoSheet.sequence.play({ rate: 1, range: [0, 2], iterationCount: Infinity })
+    }
+    const pauseAnimation = () => {
+        demoSheet.sequence.pause()
     }
     window.demoSheet = demoSheet;
 
@@ -409,28 +443,40 @@ const Threejs = () => {
 
 
     const loadfabricjstoCasparcg = () => {
-        const geometry = new THREE.BoxGeometry(7, 4, 5);
-        const material = new THREE.MeshBasicMaterial({
-            transparent: true, map: new THREE.TextureLoader().load(localStorage.getItem('RCC_currentcanvas'), (texture) => {
-                console.log(texture)
-                const shapeCount = shapesOnCanvas.length
-                const shape = "fabricjs"
-                setShapesOnCanvas(
-                    [
-                        ...shapesOnCanvas,
-                        <Shapefabricjs
-                            shape={shape}
-                            key={shapeCount}
-                            geometry={geometry}
-                            material={material}
-                            // scale={[0.64, 0.54, 1]}
-                            // position={[0, -3, 0.27]}
-                            theatreKey={shape + shapeCount}
-                        />
-                    ]
-                )
-            })
-        });
+        if (window.location.origin !== 'https://vimlesh1975.github.io') {
+            axios.post('http://localhost:9000/getCurrentCanvas').then((aa) => {
+                // console.log(aa.data1)
+                setTimeout(() => {
+                    // const geometry = new THREE.BoxGeometry(7, 4, 5);
+                    // const material = new THREE.MeshBasicMaterial({
+                    //     roughness: 0.3, metalness: 0.8,
+                    //     transparent: true,
+                    //     map: new THREE.TextureLoader().load(CurrentCanvas, (texture) => {
+                    //         // console.log(texture)
+                    //         const shapeCount = shapesOnCanvas.length
+                    //         const shape = "fabricjs"
+                    //         setShapesOnCanvas(
+                    //             [
+                    //                 ...shapesOnCanvas,
+                    //                 <Shapefabricjs
+                    //                     shape={shape}
+                    //                     key={shapeCount}
+                    //                     geometry={geometry}
+                    //                     material={material}
+                    //                     // scale={[0.64, 0.54, 1]}
+                    //                     // position={[0, -3, 0.27]}
+                    //                     theatreKey={shape + shapeCount}
+                    //                 />
+                    //             ]
+                    //         )
+                    //     })
+                    // });
+                }, 4000);
+
+            }).catch((aa) => { console.log('Error', aa) });
+        }
+
+
     }
 
 
@@ -508,14 +554,122 @@ const Threejs = () => {
 
     const copySelected = () => {
         if (selectedObject) {
-            addImportedShape("copied", selectedObject, 4545);
+            addImportedShape("copied", selectedObject, 1);
             setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
             setImported1([]);
         }
     }
+
+    const addCircle = () => {
+        const mesh = new THREE.Mesh(new THREE.CircleGeometry(1, 24), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, color: 'green', roughness: 0.3, metalness: 0.8 }))
+        addImportedShape("circle", mesh, 1);
+        setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+        setImported1([]);
+    }
+    const addCone = () => {
+        const mesh = new THREE.Mesh(new THREE.ConeGeometry(1, 2, 16), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, color: 'red', roughness: 0.3, metalness: 0.8 }))
+        addImportedShape("cone", mesh, 1);
+        setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+        setImported1([]);
+    }
+    const addCylinder = () => {
+        const mesh = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, 8, 64, 64), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, color: 'lightpink', roughness: 0.3, metalness: 0.8 }))
+        mesh.scale.set(0.2, 0.2, 0.2)
+        addImportedShape("cyllinder", mesh, 1);
+        setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+        setImported1([]);
+    }
+
+
+    const addDodecahedronGeometry = () => {
+        const mesh = new THREE.Mesh(new THREE.DodecahedronGeometry(1), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, color: 'yellow', roughness: 0.3, metalness: 0.8 }))
+        addImportedShape("Dodecahedron", mesh, 1);
+        setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+        setImported1([]);
+    }
+    const addextrudeGeometry = () => {
+        const shape = new THREE.Shape();
+        const x = -2.5;
+        const y = -5;
+        shape.moveTo(x + 2.5, y + 2.5);
+        shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y);
+        shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
+        shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
+        shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
+        shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
+        shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
+
+        const extrudeSettings = {
+            steps: 2,
+            depth: 2,
+            bevelEnabled: true,
+            bevelThickness: 1,
+            bevelSize: 1,
+            bevelSegments: 2,
+        };
+
+        const mesh = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, extrudeSettings), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, color: 'pink', roughness: 0.3, metalness: 0.8 }))
+        mesh.scale.set(0.2, 0.2, 0.2)
+        addImportedShape("extruded", mesh, 1);
+        setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+        setImported1([]);
+    }
+
+    const addLatheGeometry = () => {
+        const points = [];
+        for (let i = 0; i < 10; ++i) {
+            points.push(new THREE.Vector2(Math.sin(i * 0.2) * 3 + 3, (i - 5) * .8));
+        }
+        const mesh = new THREE.Mesh(new THREE.LatheGeometry(points), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, color: 'yellow', roughness: 0.3, metalness: 0.8 }));
+        mesh.scale.set(0.2, 0.2, 0.2)
+        addImportedShape("lathe", mesh, 1);
+        setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+        setImported1([]);
+    }
+    const addRing = () => {
+        const mesh = new THREE.Mesh(new THREE.RingGeometry(2, 7, 18), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, color: 'yellow', roughness: 0.3, metalness: 0.8 }));
+        mesh.scale.set(0.2, 0.2, 0.2)
+        addImportedShape("ring", mesh, 1);
+        setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+        setImported1([]);
+    }
+    const addTorusknot = () => {
+        const mesh = new THREE.Mesh(new THREE.TorusKnotGeometry(3.5, 1.5, 64, 64, 2, 3), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, color: 'lightblue', roughness: 0.3, metalness: 0.8 }));
+        mesh.scale.set(0.2, 0.2, 0.2)
+        addImportedShape("torusknot", mesh, 1);
+        setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+        setImported1([]);
+    }
+    const addTube = () => {
+        class CustomSinCurve extends THREE.Curve {
+            constructor(scale) {
+                super();
+                this.scale = scale;
+            }
+            getPoint(t) {
+                const tx = t * 3 - 1.5;
+                const ty = Math.sin(2 * Math.PI * t);
+                const tz = 0;
+                return new THREE.Vector3(tx, ty, tz).multiplyScalar(this.scale);
+            }
+        }
+
+        const path = new CustomSinCurve(4);
+        const tubularSegments = 20;
+        const radius = 1;
+        const radialSegments = 8;
+        const closed = false;
+
+        const mesh = new THREE.Mesh(new THREE.TubeBufferGeometry(path, tubularSegments, radius, radialSegments, closed), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, color: 'lightblue', roughness: 0.3, metalness: 0.8 }));
+        mesh.scale.set(0.2, 0.2, 0.2)
+        addImportedShape("tube", mesh, 1);
+        setShapesOnCanvas([...shapesOnCanvas, ...imported1]);
+        setImported1([]);
+    }
+
     const deleteSelected = () => {
         if (intersects[0]) {
-            scene1.children[2].detach();
+            scene1.children[3].detach();
             const updatedshapesOnCanvas = [...shapesOnCanvas];
             const bb = updatedshapesOnCanvas.filter((val, i) => {
                 return (intersects[0].object.userData.__storeKey !== "Demo Sheet:default:" + updatedshapesOnCanvas[i].props.theatreKey)
@@ -530,14 +684,14 @@ const Threejs = () => {
         }
     }
     const deleteAll = () => {
-        scene1.children[2].detach();
+        scene1.children[3].detach();
         setPickableObjects([]);
         setSelectedObject(null);
         setShapesOnCanvas([])
     }
 
     const DeselectAll = () => {
-        scene1.children[2].detach();
+        scene1.children[3].detach();
         setSelectedObject(null);
     }
     const applyColor = (e) => {
@@ -568,7 +722,7 @@ const Threejs = () => {
         intersects = raycaster1.intersectObjects(pickableObjects, false)
         if (intersects.length > 0) {
             setSelectedObject(intersects[0].object);
-            scene1.children[2].attach(intersects[0].object);
+            scene1.children[3].attach(intersects[0].object);
         }
     }
 
@@ -586,21 +740,37 @@ const Threejs = () => {
             <div style={{ border: '1px solid red' }}>
                 <div style={{ border: '1px solid red' }}>
                     <div style={{ border: '1px solid red' }}>
-                        Casparc Control
-                        {/* <button onClick={() => window.open("/ReactCasparClient/threejs")}> Opebn Full Window</button> */}
+                        Caspar Control
                         <button onClick={showToCasparcg}>Initialise casparcg</button>
                         <button onClick={resetCameraToCasparc}>caspar camera Reset</button>
-
+                        <button onClick={() => {
+                            if (studio.ui.isHidden) {
+                                studio.ui.restore();
+                            }
+                            else {
+                                studio.ui.hide();
+                            }
+                        }}>Toggle Animation Editor</button>
                     </div>
-
                     <button onClick={addBox} data-shape={"box"}>Box </button>
-                    <button onClick={addShape} data-shape={"cylinder"}>Cylinder </button>
+                    <button onClick={addCylinder} >Cylinder </button>
                     <button onClick={addShape} data-shape={"donut"}>Donut </button>
                     <button onClick={addShape} data-shape={"sphere"}>sphere </button>
 
                     <button onClick={addDreiText} data-shape={"text3D"}>3D Text</button>
                     <button onClick={() => addDreiText2()}>2D Text</button>
                     <button onClick={() => changetext()}>Change text</button>
+
+                    <button onClick={addCircle}>Circle</button>
+                    <button onClick={addCone}>Cone</button>
+                    <button onClick={addDodecahedronGeometry}>Docehedron</button>
+                    <button onClick={addextrudeGeometry}>Extrude</button>
+                    <button onClick={addLatheGeometry}>Lathe</button>
+                    <button onClick={addRing}>Ring</button>
+                    <button onClick={addTorusknot}>TorusKnot</button>
+                    <button onClick={addTube}>Tube</button>
+
+
 
 
                     <button onClick={deleteSelected}>Delete</button>
@@ -628,7 +798,8 @@ const Threejs = () => {
                         console.log(scene1.children);
                     }}>console log</button>
 
-                    <button onClick={dddd}>Test4</button>
+                    <button onClick={playAnimation}>Play Animation</button>
+                    <button onClick={pauseAnimation}>Pause Animation</button>
                 </div>
                 <div style={{ height: 650, backgroundColor: 'grey', border: '1px solid red' }} >
                     <Canvas gl={{ preserveDrawingBuffer: true }}
@@ -642,7 +813,8 @@ const Threejs = () => {
                         <SheetProvider sheet={demoSheet}>
                             <OrbitControls enabled={orbitcontrolenable} theatreKey='orb 1' />
                             <TransformControls ref={transform} theatreKey='transformControls 1' />
-                            <e.spotLight position={[10, 15, 10]} angle={10.5} theatreKey='spotLight 1' />
+                            <e.spotLight position={[10, 15, 10]} angle={10.5} intensity={10} theatreKey='spotLight 1' />
+                            <e.spotLight position={[-10, -15, -10]} angle={10.5} intensity={10} theatreKey='spotLight 2' />
                             <Suspense fallback={null}>
                                 {/* <Text color="black" anchorX="center" anchorY="middle">
                                     hello world!
