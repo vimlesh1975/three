@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, TransformControls } from "@react-three/drei";
 import * as THREE from 'three';
-import { NumberKeyframeTrack, VectorKeyframeTrack, AnimationClip, AnimationMixer } from "three";
+import { NumberKeyframeTrack, AnimationClip, AnimationMixer } from "three";
 import axios from 'axios';
 import socketIOClient from "socket.io-client";
 
@@ -56,27 +56,105 @@ const Threejs = () => {
     const [pickableObjects, setPickableObjects] = useState([])
     const [selectedObject, setSelectedObject] = useState();
     const [shapesOnCanvas, setShapesOnCanvas] = useState([])
-    var action;
-    const sampleAnimation = (mesh) => {
-        console.log(mesh)
-        const opacityKF = new NumberKeyframeTrack(".material.opacity", [0, 1, 2, 3, 4], [0, 1, 0, 1, 0]);
-        const positionKF = new VectorKeyframeTrack(".position", [0, 3, 4], [0, 0, 0, 2, 2, 2, 0, 0, 0]);
-        const moveBlinkClip = new AnimationClip("move-n-blink", -1, [
-            positionKF,
-            opacityKF,
-        ]);
-        const mixer = new AnimationMixer(mesh);
-        action = mixer.clipAction(moveBlinkClip);
-        action.play();
-        const clock = new THREE.Clock();
-        const aa = () => {
-            mixer.update(clock.getDelta());
-            requestAnimationFrame(aa);
-        }
-        aa();
-    }
-    const stop1 = () => action.stop();
+    var pickableObjects2;
 
+    const sampleAnimationcaspar=()=>{
+        var positionKF2 = [];
+        pickableObjects.forEach(mesh => {
+            const _objectid = mesh.userData.__storeKey.split('Demo Sheet:default:')[1];
+            if (studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid]) {
+                const trackData = Object.values(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid].trackData)
+                trackData.forEach(element => {
+                    const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
+                    const aa = element.keyframes
+                    const bb = []
+                    aa.forEach((val) => {
+                        bb.push(val.position)
+                    })
+                    const cc = []
+                    aa.forEach((val) => {
+                        cc.push(val.value)
+                    })
+                    positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
+                });
+            }
+        });
+
+        endpoint(`call 1-97 "
+        sampleAnimation(${JSON.stringify(positionKF2).replaceAll('"', '\\"')});
+        "`);
+
+    }
+
+    const sampleAnimation = () => {
+        pickableObjects.forEach(mesh => {
+            const _objectid = mesh.userData.__storeKey.split('Demo Sheet:default:')[1];
+            if (studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid]) {
+                const trackData = Object.values(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid].trackData)
+                var positionKF2 = [];
+                trackData.forEach(element => {
+                    const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
+                    const aa = element.keyframes
+                    const bb = []
+                    aa.forEach((val) => {
+                        bb.push(val.position)
+                    })
+                    const cc = []
+                    aa.forEach((val) => {
+                        cc.push(val.value)
+                    })
+                    positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
+                });
+                const moveBlinkClip = new AnimationClip("move-n-blink", -1, [...positionKF2]);
+                const mixer = new AnimationMixer(mesh);
+                var action = mixer.clipAction(moveBlinkClip);
+                action.setLoop(THREE.LoopPingPong, 2);
+                action.play();
+                const clock = new THREE.Clock();
+                const aa1 = () => {
+                    mixer.update(clock.getDelta());
+                    requestAnimationFrame(aa1);
+                }
+                aa1();
+            }
+        });
+    }
+    const sampleAnimation2 = () => {
+        pickableObjects2 = [...scene2.children]
+        pickableObjects2.splice(0, 4)
+        //    console.log(pickableObjects2)
+        pickableObjects2.forEach(mesh => {
+            const _objectid = mesh.userData.__storeKey.split('Demo Sheet:default:')[1];
+            if (studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid]) {
+                const trackData = Object.values(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid].trackData)
+                var positionKF2 = [];
+                trackData.forEach(element => {
+                    const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
+                    const aa = element.keyframes
+                    const bb = []
+                    aa.forEach((val) => {
+                        bb.push(val.position)
+                    })
+                    const cc = []
+                    aa.forEach((val) => {
+                        cc.push(val.value)
+                    })
+                    positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
+                });
+                const moveBlinkClip = new AnimationClip("move-n-blink", -1, [...positionKF2]);
+                const mixer = new AnimationMixer(mesh);
+                var action = mixer.clipAction(moveBlinkClip);
+                action.setLoop(THREE.LoopPingPong, 2);
+                action.play();
+                const clock = new THREE.Clock();
+                const aa1 = () => {
+                    mixer.update(clock.getDelta());
+                    requestAnimationFrame(aa1);
+                }
+                aa1();
+            }
+        });
+    }
 
     const Shape = (props) => {
 
@@ -188,9 +266,17 @@ const Threejs = () => {
             });
         }
         )
+        socket.on('error', function () {
+            socket?.removeListener('setCurrentCanvas');
+            socket?.off('setCurrentCanvas');
+            socket?.disconnect();
+        })
+
 
         return () => {
-            // second
+            socket?.removeListener('setCurrentCanvas');
+            socket?.off('setCurrentCanvas');
+            socket?.disconnect();
         }
     }, [shapesOnCanvas])
 
@@ -441,6 +527,7 @@ const Threejs = () => {
         demoSheet.sequence.pause()
     }
     window.demoSheet = demoSheet;
+    window.studio = studio;
 
     async function downloadJSON(gltf) {
         const element = document.createElement("a");
@@ -764,6 +851,10 @@ const Threejs = () => {
                     <div style={{ border: '1px solid red' }}>
                         Caspar Control
                         <button onClick={showToCasparcg}>Initialise casparcg</button>
+                    <button onClick={updatetoCaspar1}>Update to Caspar</button>
+                    <button onClick={sampleAnimationcaspar}>animation to Caspar</button>
+                    
+
                         <button onClick={resetCameraToCasparc}>caspar camera Reset</button>
                         <button onClick={() => {
                             if (studio.ui.isHidden) {
@@ -809,7 +900,6 @@ const Threejs = () => {
                     Texture<input id="importjson" type='file' className='input-file' accept='.png,jpg,.bmp,.jpeg' onChange={e => applyTexture(e.target.files[0])} />
 
 
-                    <button onClick={updatetoCaspar1}>Update to Caspar</button>
                     <button onClick={resetCamera1}>Reset Camera</button>
                     <button onClick={loadfabricjstoCasparcg}>Load fabricjs here</button>
 
@@ -822,8 +912,8 @@ const Threejs = () => {
 
                     <button onClick={playAnimation}>Play Animation</button>
                     <button onClick={pauseAnimation}>Pause Animation</button>
-                    <button onClick={() => sampleAnimation(selectedObject)}>Play Sample Animation</button>
-                    <button onClick={() => stop1()}>Stop Sample Animation</button>
+                    <button onClick={sampleAnimation}>Play Sample Animation</button>
+                    {/* <button onClick={logkeyframes}>Log keyframes</button> */}
                 </div>
                 <div style={{ height: 650, backgroundColor: 'grey', border: '1px solid red' }} >
                     <Canvas gl={{ preserveDrawingBuffer: true }}
@@ -892,8 +982,10 @@ const Threejs = () => {
                     <button onClick={resetCamera2}>Reset Camera</button>
                     <button onClick={addLight}>Add light</button>
                     <button onClick={() => console.log(scene2)}>console log</button>
+                    <button onClick={sampleAnimation2}>Play Above animation</button>
+
                 </div>
-                <div style={{ position: 'absolute', top: 575, minWidth: 200, height: 150, backgroundColor: 'grey', border: '1px solid red' }} >
+                <div style={{ position: 'absolute', top: 585, minWidth: 200, height: 150, backgroundColor: 'grey', border: '1px solid red' }} >
                     <Canvas onCreated={({ gl, raycaster, scene, camera }) => {
                         setCamera2(camera);
                     }}
