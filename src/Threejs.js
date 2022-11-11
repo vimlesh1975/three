@@ -168,7 +168,7 @@ const Threejs = () => {
         }
     }
 
-  
+
     const sampleAnimation2 = () => {
         pickableObjects2 = [...scene2.children]
         pickableObjects2.splice(0, 4)
@@ -382,7 +382,7 @@ const Threejs = () => {
                 onPointerOut={e => {
                     e.object.material.emissive && (e.object.material.emissive.r = 0)
                 }}
-                >
+            >
                 <primitive object={props.geometry} attach={"geometry"} />
                 <primitive object={props.material} attach={"material"} />
             </e.mesh>
@@ -935,7 +935,7 @@ const Threejs = () => {
     //     console.log(updatedpickableObjects)
     //     // setTimeout(() => {
     //     // console.log(scene1.children)
-            
+
     //     // }, 1000);
     //     // setSelectedObject(pickableObjects[0])
     //     // scene1.children[3].attach(pickableObjects[0]);
