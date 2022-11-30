@@ -210,10 +210,10 @@ const Threejs = () => {
 
         const mesh = useRef();
         const allShapes = {
-            box: new THREE.BoxGeometry(6, 1, 0.3),
+            box: new THREE.BoxGeometry(1, 1, 0.3),
             cylinder: new THREE.CylinderGeometry(1, 1, 1, 32),
-            donut: new THREE.TorusGeometry(0.5, 0.2, 3, 20),
-            sphere: new THREE.SphereGeometry(0.5, 16, 16),
+            donut: new THREE.TorusGeometry(1, 0.2, 3, 20),
+            sphere: new THREE.SphereGeometry(1, 16, 16),
         }
         const allColors = {
             box: "red",
@@ -249,7 +249,7 @@ const Threejs = () => {
                     e.object.material.emissive.r = 0;
                 }} >
                 <primitive object={props.geometry} attach={"geometry"} />
-                <meshStandardMaterial color={props.color} />
+                <meshStandardMaterial color={props.color} roughness={0.3} metalness={0.8} />
             </mesh>
         );
     }
@@ -350,7 +350,7 @@ const Threejs = () => {
                     key={shapeCount}
                     theatreKey={shape + shapeCount}
                     position={new Vector3(0, 0, 0)}
-                    rotation={new Euler(0, 0, 0)}
+                    rotation={new Euler(10, 10, 10)}
                     scale={new Vector3(1, 1, 1)}
                 />
             ]
@@ -443,15 +443,15 @@ const Threejs = () => {
     useEffect(() => {
         setTimeout(() => {
             if (scene1?.children?.length > 4) {
-                setTimeout(() => {
-                    const aa5 = [...scene1.children];
-                    aa5.splice(0, 4)
-                    setPickableObjects(aa5);
-                    scene1.children[3].attach(scene1.children[scene1.children.length - 1])
-                    setSelectedObject(scene1.children[scene1.children.length - 1]);
-                }, 1000);
+                const aa5 = [...scene1.children];
+                aa5.splice(0, 4)
+                setPickableObjects(aa5);
+                // if (scene1.children[scene1.children.length - 1].parent !== null) {
+                scene1.children[3].attach(scene1.children[scene1.children.length - 1])
+                // }
+                setSelectedObject(scene1.children[scene1.children.length - 1]);
             }
-        }, 100);
+        }, 10);
 
         return () => {
             // second
@@ -694,10 +694,10 @@ const Threejs = () => {
                 <Shapetext3D
                     shape={shape}
                     key={shapeCount}
-                    geometry={new THREE.BoxGeometry(11, 1, 0.3)}
+                    geometry={new THREE.BoxGeometry(2, 2, 2)}
                     theatreKey={shape + shapeCount}
                     position={new Vector3(0, 0, 0)}
-                    rotation={new Euler(0, 0, 0)}
+                    rotation={new Euler(10, 20, 0)}
                     scale={new Vector3(1, 1, 1)}
                     color={'maroon'}
 
@@ -1062,7 +1062,7 @@ const Threejs = () => {
                             }
                         }}>Toggle Animation Editor</button> */}
                     </div>
-                    <button onClick={addBox} data-shape={"box"}>Box </button>
+                    <button onClick={addShape} data-shape={"box"}>Box </button>
                     <button onClick={addShape} data-shape={"cylinder"} >Cylinder </button>
                     <button onClick={addShape} data-shape={"donut"}>Donut </button>
                     <button onClick={addShape} data-shape={"sphere"}>sphere </button>
@@ -1120,8 +1120,8 @@ const Threejs = () => {
                         {/* <SheetProvider sheet={demoSheet}> */}
                         <OrbitControls enabled={orbitcontrolenable} />
                         <TransformControls ref={reftransform} />
-                        <spotLight position={[10, 15, 10]} angle={10.5} intensity={10} />
-                        <spotLight position={[-10, -15, -10]} angle={10.5} intensity={10} />
+                        <spotLight position={[10, 15, 10]} angle={10.5} intensity={2} />
+                        <spotLight position={[-10, -15, -10]} angle={-10.5} intensity={4} />
                         <Suspense fallback={null}>
                             {shapesOnCanvas}
                         </Suspense>
