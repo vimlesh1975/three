@@ -2,7 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, TransformControls } from "@react-three/drei";
 import * as THREE from 'three';
 // import { NumberKeyframeTrack, AnimationClip, AnimationMixer, Vector3, Euler } from "three";
-import {    Vector3, Euler } from "three";
+import { Vector3, Euler } from "three";
 import axios from 'axios';
 import socketIOClient from "socket.io-client";
 
@@ -46,7 +46,7 @@ const Threejs = () => {
     const onDragEnd = (result) => {
         const aa1 = [...aa]
         if (result.destination != null) {
-            aa1.splice(result.destination?.index, 0, aa.splice(result.source?.index, 1)[0])
+            aa1.splice(result.destination?.index, 0, aa1.splice(result.source?.index, 1)[0])
             setAA(aa1)
         }
     }
@@ -364,12 +364,13 @@ const Threejs = () => {
             <ShapeImported
                 shape={shape}
                 key={(Math.random()) * 1000}
-                theatreKey={shape + shapeCount + i}
                 position={mesh1.position}
                 rotation={mesh1.rotation}
                 scale={mesh1.scale}
                 geometry={mesh1.geometry}
                 material={mesh1.material.clone()}
+                theatreKey={shape + shapeCount}
+
             />
         )
     }
@@ -441,18 +442,13 @@ const Threejs = () => {
 
     useEffect(() => {
         setTimeout(() => {
-            // scene1?.children && scene1?.children[3].detach();
             if (scene1?.children?.length > 4) {
-                scene1?.children && scene1?.children[3].detach();
-                const aa = [...scene1.children];
-                aa.splice(0, 4)
-                setPickableObjects(aa);
-                // scene1.children[3].attach(scene1.children[scene1.children.length - 1])
-                // setSelectedObject(scene1.children[scene1.children.length - 1]);
                 setTimeout(() => {
+                    const aa5 = [...scene1.children];
+                    aa5.splice(0, 4)
+                    setPickableObjects(aa5);
                     scene1.children[3].attach(scene1.children[scene1.children.length - 1])
                     setSelectedObject(scene1.children[scene1.children.length - 1]);
-                    // selectobjectgiven(scene1.children[scene1.children.length - 1])
                 }, 1000);
             }
         }, 100);
@@ -679,10 +675,10 @@ const Threejs = () => {
                         shape={shape}
                         key={shapeCount}
                         geometry={geometry}
+                        theatreKey={shape + shapeCount}
                         position={new Vector3(0, 0, 0)}
                         rotation={new Euler(0, 0, 0)}
                         scale={new Vector3(1, 1, 1)}
-                        theatreKey={shape + shapeCount}
                         color={'yellow'}
                     />
                 ]
@@ -699,11 +695,12 @@ const Threejs = () => {
                     shape={shape}
                     key={shapeCount}
                     geometry={new THREE.BoxGeometry(11, 1, 0.3)}
+                    theatreKey={shape + shapeCount}
                     position={new Vector3(0, 0, 0)}
                     rotation={new Euler(0, 0, 0)}
                     scale={new Vector3(1, 1, 1)}
-                    theatreKey={shape + shapeCount}
                     color={'maroon'}
+
                 />
             ]
         )
@@ -721,10 +718,10 @@ const Threejs = () => {
                     key={shapeCount}
                     geometry={dreiText2.geometry}
                     material={dreiText2.material}
+                    theatreKey={shape + shapeCount}
                     position={new Vector3(0, 0, 0)}
                     rotation={new Euler(0, 0, 0)}
                     scale={new Vector3(1, 1, 1)}
-                    theatreKey={shape + shapeCount}
                     color={'white'}
                 />
             ]
@@ -842,7 +839,7 @@ const Threejs = () => {
             scene1.children[3].detach();
             const updatedshapesOnCanvas = [...shapesOnCanvas];
             const bb = updatedshapesOnCanvas.filter((val, i) => {
-                return (intersects[0].object.userData.__storeKey !== "Demo Sheet:default:" + updatedshapesOnCanvas[i].props.theatreKey)
+                return (intersects[0].object.theatreKey !== val.props.theatreKey)
             })
             setShapesOnCanvas(bb);
             const updatedpickableObjects = [...pickableObjects]
@@ -918,7 +915,7 @@ const Threejs = () => {
             setImported1([]);
             const cameraPosition = JSON.parse(aa[i].cameraPosition);
             camera1.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
-            console.log(JSON.parse(aa[i].animation));
+            // console.log(JSON.parse(aa[i].animation));
             // setdemoSheet(getProject('Demo Project' + Math.floor(Math.random() * 10), { state: JSON.parse(aa[i].animation) }).sheet('Demo Sheet'))
         });
     }
