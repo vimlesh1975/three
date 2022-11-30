@@ -1,7 +1,8 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, TransformControls } from "@react-three/drei";
 import * as THREE from 'three';
-import { NumberKeyframeTrack, AnimationClip, AnimationMixer, Vector3, Euler } from "three";
+// import { NumberKeyframeTrack, AnimationClip, AnimationMixer, Vector3, Euler } from "three";
+import {    Vector3, Euler } from "three";
 import axios from 'axios';
 import socketIOClient from "socket.io-client";
 
@@ -17,18 +18,18 @@ import { GLTFExporter } from './GLTFExporter.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 
-import { getProject, types } from '@theatre/core'
+// import { getProject, types } from '@theatre/core'
 
-import studio from '@theatre/studio'
-import extension from '@theatre/r3f/dist/extension'
-import { editable as e, SheetProvider } from '@theatre/r3f'
+// import studio from '@theatre/studio'
+// import extension from '@theatre/r3f/dist/extension'
+// import { editable as e, SheetProvider } from '@theatre/r3f'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { VscTrash, VscMove } from "react-icons/vsc";
 
 
-studio.extend(extension);
+// studio.extend(extension);
 
-studio.initialize();
+// studio.initialize();
 
 
 
@@ -38,7 +39,7 @@ const transformMode = ["scale", "rotate", "translate"];
 var intersects;
 
 const Threejs = () => {
-    const [demoSheet, setdemoSheet] = useState(getProject('Demo Project').sheet('Demo Sheet'))
+    // const [demoSheet, setdemoSheet] = useState(getProject('Demo Project').sheet('Demo Sheet'))
 
 
 
@@ -78,132 +79,132 @@ const Threejs = () => {
     const [pickableObjects, setPickableObjects] = useState([])
     const [selectedObject, setSelectedObject] = useState();
     const [shapesOnCanvas, setShapesOnCanvas] = useState([])
-    var pickableObjects2;
+    // var pickableObjects2;
 
-    const sampleAnimationcaspar = () => {
-        pickableObjects.forEach((mesh, i) => {
-            const _objectid = mesh.userData.__storeKey.split('Demo Sheet:default:')[1];
-            if (studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid]) {
-                const trackData = Object.values(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid].trackData)
+    // const sampleAnimationcaspar = () => {
+    //     pickableObjects.forEach((mesh, i) => {
+    //         const _objectid = mesh.userData.__storeKey.split('Demo Sheet:default:')[1];
+    //         if (studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid]) {
+    //             const trackData = Object.values(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid].trackData)
 
-                trackData.forEach(element => {
-                    var positionKF2 = [];
-                    const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
-                    const aa = element.keyframes
-                    const bb = []
-                    aa.forEach((val) => {
-                        bb.push(val.position)
-                    })
-                    const cc = []
-                    aa.forEach((val) => {
-                        cc.push(val.value)
-                    })
-                    positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
-                    endpoint(`call 1-97 "
-                    sampleAnimation(${(JSON.stringify(positionKF2[0])).replaceAll('"', '\\"')}, ${i});
-                    "`);
-                });
+    //             trackData.forEach(element => {
+    //                 var positionKF2 = [];
+    //                 const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
+    //                 const aa = element.keyframes
+    //                 const bb = []
+    //                 aa.forEach((val) => {
+    //                     bb.push(val.position)
+    //                 })
+    //                 const cc = []
+    //                 aa.forEach((val) => {
+    //                     cc.push(val.value)
+    //                 })
+    //                 positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
+    //                 endpoint(`call 1-97 "
+    //                 sampleAnimation(${(JSON.stringify(positionKF2[0])).replaceAll('"', '\\"')}, ${i});
+    //                 "`);
+    //             });
 
-            }
+    //         }
 
-        });
+    //     });
 
-    }
+    // }
 
-    const sampleAnimation = () => {
-        pickableObjects.forEach(mesh => {
-            const _objectid = mesh.userData.__storeKey.split('Demo Sheet:default:')[1];
-            if (studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid]) {
-                const trackData = Object.values(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid].trackData)
-                var positionKF2 = [];
-                trackData.forEach(element => {
-                    const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
-                    const aa = element.keyframes
-                    const bb = []
-                    aa.forEach((val) => {
-                        bb.push(val.position)
-                    })
-                    const cc = []
-                    aa.forEach((val) => {
-                        cc.push(val.value)
-                    })
-                    positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
-                });
-                const moveBlinkClip = new AnimationClip("move-n-blink", -1, [...positionKF2]);
-                const mixer = new AnimationMixer(mesh);
-                var action = mixer.clipAction(moveBlinkClip);
-                action.clampWhenFinished = true;
+    // const sampleAnimation = () => {
+    //     pickableObjects.forEach(mesh => {
+    //         const _objectid = mesh.userData.__storeKey.split('Demo Sheet:default:')[1];
+    //         if (studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid]) {
+    //             const trackData = Object.values(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid].trackData)
+    //             var positionKF2 = [];
+    //             trackData.forEach(element => {
+    //                 const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
+    //                 const aa = element.keyframes
+    //                 const bb = []
+    //                 aa.forEach((val) => {
+    //                     bb.push(val.position)
+    //                 })
+    //                 const cc = []
+    //                 aa.forEach((val) => {
+    //                     cc.push(val.value)
+    //                 })
+    //                 positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
+    //             });
+    //             const moveBlinkClip = new AnimationClip("move-n-blink", -1, [...positionKF2]);
+    //             const mixer = new AnimationMixer(mesh);
+    //             var action = mixer.clipAction(moveBlinkClip);
+    //             action.clampWhenFinished = true;
 
-                action.setLoop(THREE.LoopOnce);
-                action.play();
-                const clock = new THREE.Clock();
-                const aa1 = () => {
-                    mixer.update(clock.getDelta());
-                    requestAnimationFrame(aa1);
-                }
-                aa1();
-            }
-        });
-    }
-    var currentobj;
+    //             action.setLoop(THREE.LoopOnce);
+    //             action.play();
+    //             const clock = new THREE.Clock();
+    //             const aa1 = () => {
+    //                 mixer.update(clock.getDelta());
+    //                 requestAnimationFrame(aa1);
+    //             }
+    //             aa1();
+    //         }
+    //     });
+    // }
+    // var currentobj;
 
-    const selectobjectgiven = (object1) => {
-        if (object1.__r3f) {
-            const theaterKey = object1.userData.__storeKey.split('Demo Sheet:default:')[1];
-            const props1 = {
-                position: { x: types.number(object1.__r3f.memoizedProps.position[0] ? object1.__r3f.memoizedProps.position[0] : object1.__r3f.memoizedProps.position.x, { nudgeMultiplier: 0.01 }), y: types.number(object1.__r3f.memoizedProps.position[1] ? object1.__r3f.memoizedProps.position[1] : object1.__r3f.memoizedProps.position.y, { nudgeMultiplier: 0.01 }), z: types.number(object1.__r3f.memoizedProps.position[2] ? object1.__r3f.memoizedProps.position[2] : object1.__r3f.memoizedProps.position.z, { nudgeMultiplier: 0.01 }) },
+    // const selectobjectgiven = (object1) => {
+    //     if (object1.__r3f) {
+    //         const theaterKey = object1.userData.__storeKey.split('Demo Sheet:default:')[1];
+    //         const props1 = {
+    //             position: { x: types.number(object1.__r3f.memoizedProps.position[0] ? object1.__r3f.memoizedProps.position[0] : object1.__r3f.memoizedProps.position.x, { nudgeMultiplier: 0.01 }), y: types.number(object1.__r3f.memoizedProps.position[1] ? object1.__r3f.memoizedProps.position[1] : object1.__r3f.memoizedProps.position.y, { nudgeMultiplier: 0.01 }), z: types.number(object1.__r3f.memoizedProps.position[2] ? object1.__r3f.memoizedProps.position[2] : object1.__r3f.memoizedProps.position.z, { nudgeMultiplier: 0.01 }) },
 
-                rotation: { x: types.number(object1.__r3f.memoizedProps.rotation[0] ? object1.__r3f.memoizedProps.rotation[0] : object1.__r3f.memoizedProps.rotation._x, { nudgeMultiplier: 0.01 }), y: types.number(object1.__r3f.memoizedProps.rotation[1] ? object1.__r3f.memoizedProps.rotation[1] : object1.__r3f.memoizedProps.rotation._y, { nudgeMultiplier: 0.01 }), z: types.number(object1.__r3f.memoizedProps.rotation[2] ? object1.__r3f.memoizedProps.rotation[2] : object1.__r3f.memoizedProps.rotation._z, { nudgeMultiplier: 0.01 }) },
-                scale: { x: types.number(object1.__r3f.memoizedProps.scale[0] ? object1.__r3f.memoizedProps.scale[0] : object1.__r3f.memoizedProps.scale.x, { nudgeMultiplier: 0.01 }), y: types.number(object1.__r3f.memoizedProps.scale[1] ? object1.__r3f.memoizedProps.scale[1] : object1.__r3f.memoizedProps.scale.y, { nudgeMultiplier: 0.01 }), z: types.number(object1.__r3f.memoizedProps.scale[2] ? object1.__r3f.memoizedProps.scale[2] : object1.__r3f.memoizedProps.scale.z, { nudgeMultiplier: 0.01 }) },
+    //             rotation: { x: types.number(object1.__r3f.memoizedProps.rotation[0] ? object1.__r3f.memoizedProps.rotation[0] : object1.__r3f.memoizedProps.rotation._x, { nudgeMultiplier: 0.01 }), y: types.number(object1.__r3f.memoizedProps.rotation[1] ? object1.__r3f.memoizedProps.rotation[1] : object1.__r3f.memoizedProps.rotation._y, { nudgeMultiplier: 0.01 }), z: types.number(object1.__r3f.memoizedProps.rotation[2] ? object1.__r3f.memoizedProps.rotation[2] : object1.__r3f.memoizedProps.rotation._z, { nudgeMultiplier: 0.01 }) },
+    //             scale: { x: types.number(object1.__r3f.memoizedProps.scale[0] ? object1.__r3f.memoizedProps.scale[0] : object1.__r3f.memoizedProps.scale.x, { nudgeMultiplier: 0.01 }), y: types.number(object1.__r3f.memoizedProps.scale[1] ? object1.__r3f.memoizedProps.scale[1] : object1.__r3f.memoizedProps.scale.y, { nudgeMultiplier: 0.01 }), z: types.number(object1.__r3f.memoizedProps.scale[2] ? object1.__r3f.memoizedProps.scale[2] : object1.__r3f.memoizedProps.scale.z, { nudgeMultiplier: 0.01 }) },
 
-            };
-            // console.log(theaterKey)
-            // console.log(props1)
-            const obj = demoSheet.object(theaterKey, props1, { override: true });
-            // obj.onValuesChange(newValues => {
-            //     console.log(newValues)
-            // })
-            studio.setSelection([obj])
-            currentobj = obj;
-        }
-    }
+    //         };
+    //         // console.log(theaterKey)
+    //         // console.log(props1)
+    //         const obj = demoSheet.object(theaterKey, props1, { override: true });
+    //         // obj.onValuesChange(newValues => {
+    //         //     console.log(newValues)
+    //         // })
+    //         // studio.setSelection([obj])
+    //         currentobj = obj;
+    //     }
+    // }
 
 
-    const sampleAnimation2 = () => {
-        pickableObjects2 = [...scene2.children]
-        pickableObjects2.splice(0, 4)
-        pickableObjects2.forEach(mesh => {
-            const _objectid = mesh.userData.__storeKey.split('Demo Sheet:default:')[1];
-            if (studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid]) {
-                const trackData = Object.values(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid].trackData)
-                var positionKF2 = [];
-                trackData.forEach(element => {
-                    const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
-                    const aa = element.keyframes
-                    const bb = []
-                    aa.forEach((val) => {
-                        bb.push(val.position)
-                    })
-                    const cc = []
-                    aa.forEach((val) => {
-                        cc.push(val.value)
-                    })
-                    positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
-                });
-                const moveBlinkClip = new AnimationClip("move-n-blink", -1, [...positionKF2]);
-                const mixer = new AnimationMixer(mesh);
-                var action = mixer.clipAction(moveBlinkClip);
-                action.setLoop(THREE.LoopPingPong, 2);
-                action.play();
-                const clock = new THREE.Clock();
-                const aa1 = () => {
-                    mixer.update(clock.getDelta());
-                    requestAnimationFrame(aa1);
-                }
-                aa1();
-            }
-        });
-    }
+    // const sampleAnimation2 = () => {
+    //     pickableObjects2 = [...scene2.children]
+    //     pickableObjects2.splice(0, 4)
+    //     pickableObjects2.forEach(mesh => {
+    //         const _objectid = mesh.userData.__storeKey.split('Demo Sheet:default:')[1];
+    //         if (studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid]) {
+    //             const trackData = Object.values(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"].sequence.tracksByObject[_objectid].trackData)
+    //             var positionKF2 = [];
+    //             trackData.forEach(element => {
+    //                 const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
+    //                 const aa = element.keyframes
+    //                 const bb = []
+    //                 aa.forEach((val) => {
+    //                     bb.push(val.position)
+    //                 })
+    //                 const cc = []
+    //                 aa.forEach((val) => {
+    //                     cc.push(val.value)
+    //                 })
+    //                 positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
+    //             });
+    //             const moveBlinkClip = new AnimationClip("move-n-blink", -1, [...positionKF2]);
+    //             const mixer = new AnimationMixer(mesh);
+    //             var action = mixer.clipAction(moveBlinkClip);
+    //             action.setLoop(THREE.LoopPingPong, 2);
+    //             action.play();
+    //             const clock = new THREE.Clock();
+    //             const aa1 = () => {
+    //                 mixer.update(clock.getDelta());
+    //                 requestAnimationFrame(aa1);
+    //             }
+    //             aa1();
+    //         }
+    //     });
+    // }
 
     const Shape = (props) => {
 
@@ -221,7 +222,7 @@ const Threejs = () => {
             sphere: "green",
         }
         return (
-            <e.mesh
+            <mesh
                 {...props}
                 ref={mesh}
                 onPointerOver={e => {
@@ -233,14 +234,14 @@ const Threejs = () => {
             >
                 <primitive object={allShapes[props.shape]} attach={"geometry"} />
                 <meshStandardMaterial color={allColors[props.shape]} roughness={0.3} metalness={0.8} />
-            </e.mesh>
+            </mesh>
         );
     }
 
     const Shapetext3D = (props) => {
         const mesh = useRef();
         return (
-            <e.mesh {...props} ref={mesh}
+            <mesh {...props} ref={mesh}
                 onPointerOver={e => {
                     e.object.material.emissive.r = 1;
                 }}
@@ -249,14 +250,14 @@ const Threejs = () => {
                 }} >
                 <primitive object={props.geometry} attach={"geometry"} />
                 <meshStandardMaterial color={props.color} />
-            </e.mesh>
+            </mesh>
         );
     }
 
     const Shapetext2D = (props) => {
         const mesh = useRef();
         return (
-            <e.mesh {...props} ref={mesh} onPointerOver={e => {
+            <mesh {...props} ref={mesh} onPointerOver={e => {
                 e.object.material.emissive && (e.object.material.emissive.r = 1);
             }}
                 onPointerOut={e => {
@@ -264,14 +265,14 @@ const Threejs = () => {
                 }}>
                 <primitive object={props.geometry} attach={"geometry"} />
                 <primitive object={props.material} attach={"material"} />
-            </e.mesh>
+            </mesh>
         );
     }
 
     const Shapefabricjs = (props) => {
         const mesh = useRef();
         return (
-            <e.mesh {...props} ref={mesh} onPointerOver={e => {
+            <mesh {...props} ref={mesh} onPointerOver={e => {
                 e.object.material.emissive && (e.object.material.emissive.r = 1)
             }}
                 onPointerOut={e => {
@@ -279,7 +280,7 @@ const Threejs = () => {
                 }}>
                 <primitive object={props.geometry} attach={"geometry"} />
                 <primitive object={props.material} attach={"material"} />
-            </e.mesh>
+            </mesh>
         );
     }
 
@@ -376,7 +377,7 @@ const Threejs = () => {
     const ShapeImported = (props) => {
         const mesh = useRef();
         return (<>
-            <e.mesh {...props} ref={mesh} onPointerOver={e => {
+            <mesh {...props} ref={mesh} onPointerOver={e => {
                 e.object.material.emissive && (e.object.material.emissive.r = 1)
             }}
                 onPointerOut={e => {
@@ -385,7 +386,7 @@ const Threejs = () => {
             >
                 <primitive object={props.geometry} attach={"geometry"} />
                 <primitive object={props.material} attach={"material"} />
-            </e.mesh>
+            </mesh>
         </>)
     }
 
@@ -405,18 +406,18 @@ const Threejs = () => {
         if (pickableObjects.length > 0) {
             dragControls = new DragControls(pickableObjects, camera1, gl1?.domElement);
             dragControls.addEventListener('dragstart', function (event) {
-                selectobjectgiven(event.object);
+                // selectobjectgiven(event.object);
                 // setorbitcontrolenable(false);
             });
 
-            dragControls.addEventListener('drag', function (event) {
-                if (currentobj) {
-                    studio.transaction(({ set }) => {
-                        set(currentobj.props.position, { x: event.object.position.x, y: event.object.position.y, z: event.object.position.z }) // set the value of obj.props.x to 10
-                    })
-                }
+            // dragControls.addEventListener('drag', function (event) {
+            //     if (currentobj) {
+            //         studio.transaction(({ set }) => {
+            //             set(currentobj.props.position, { x: event.object.position.x, y: event.object.position.y, z: event.object.position.z }) // set the value of obj.props.x to 10
+            //         })
+            //     }
 
-            });
+            // });
 
             // dragControls.addEventListener('dragend', function (event) {
             //     // setorbitcontrolenable(true);
@@ -451,7 +452,7 @@ const Threejs = () => {
                 setTimeout(() => {
                     scene1.children[3].attach(scene1.children[scene1.children.length - 1])
                     setSelectedObject(scene1.children[scene1.children.length - 1]);
-                    selectobjectgiven(scene1.children[scene1.children.length - 1])
+                    // selectobjectgiven(scene1.children[scene1.children.length - 1])
                 }, 1000);
             }
         }, 100);
@@ -490,9 +491,9 @@ const Threejs = () => {
                 importScenefromData(${JSON.stringify(gltf2.scene.toJSON()).replaceAll('"', '\\"')});
                 camera1.position.set(${camera1.position.x}, ${camera1.position.y}, ${camera1.position.z});
                 "`);
-                setTimeout(() => {
-                    sampleAnimationcaspar();
-                }, 1000);
+                // setTimeout(() => {
+                //     sampleAnimationcaspar();
+                // }, 1000);
             });
         },
             error => {
@@ -619,14 +620,14 @@ const Threejs = () => {
         );
     }
 
-    const playAnimation = () => {
-        demoSheet.sequence.play({ rate: 1, range: [0, 2], iterationCount: Infinity })
-    }
-    const pauseAnimation = () => {
-        demoSheet.sequence.pause()
-    }
-    window.demoSheet = demoSheet;
-    window.studio = studio;
+    // const playAnimation = () => {
+    //     demoSheet.sequence.play({ rate: 1, range: [0, 2], iterationCount: Infinity })
+    // }
+    // const pauseAnimation = () => {
+    //     demoSheet.sequence.pause()
+    // }
+    // window.demoSheet = demoSheet;
+    // window.studio = studio;
 
     async function downloadJSON(gltf) {
         const element = document.createElement("a");
@@ -891,7 +892,7 @@ const Threejs = () => {
         intersects = raycaster1.intersectObjects(pickableObjects, false)
         if (intersects.length > 0) {
             setSelectedObject(intersects[0].object);
-            selectobjectgiven(intersects[0].object)
+            // selectobjectgiven(intersects[0].object)
             scene1.children[3].attach(intersects[0].object);
         }
     }
@@ -918,7 +919,7 @@ const Threejs = () => {
             const cameraPosition = JSON.parse(aa[i].cameraPosition);
             camera1.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
             console.log(JSON.parse(aa[i].animation));
-            setdemoSheet(getProject('Demo Project' + Math.floor(Math.random() * 10), { state: JSON.parse(aa[i].animation) }).sheet('Demo Sheet'))
+            // setdemoSheet(getProject('Demo Project' + Math.floor(Math.random() * 10), { state: JSON.parse(aa[i].animation) }).sheet('Demo Sheet'))
         });
     }
 
@@ -964,7 +965,7 @@ const Threejs = () => {
         exporter.parse(
             scene1,
             gltf => {
-                dd.push({ pageName: 'page' + dd.length, gltf: JSON.stringify(gltf), cameraPosition: JSON.stringify([camera1.position.x, camera1.position.y, camera1.position.z]), animation: JSON.stringify(studio.createContentOfSaveFile('Demo Project').sheetsById["Demo Sheet"]) });
+                dd.push({ pageName: 'page' + dd.length, gltf: JSON.stringify(gltf), cameraPosition: JSON.stringify([camera1.position.x, camera1.position.y, camera1.position.z]) });
                 setAA(dd)
             },
             function (error) {
@@ -1017,29 +1018,29 @@ const Threejs = () => {
 
         setAA(aa2)
     };
-    const onObjectChange = () => {
+    // const onObjectChange = () => {
 
-        if (selectedObject) {
-            selectobjectgiven(selectedObject);
-            if (currentobj) {
-                studio.transaction(({ set }) => {
-                    set(currentobj.props.position, { x: selectedObject.position.x, y: selectedObject.position.y, z: selectedObject.position.z });
-                    set(currentobj.props.rotation, { x: selectedObject.rotation.x, y: selectedObject.rotation.y, z: selectedObject.rotation.z });
-                    set(currentobj.props.scale, { x: selectedObject.scale.x, y: selectedObject.scale.y, z: selectedObject.scale.z });
-                })
-            }
+    //     if (selectedObject) {
+    //         selectobjectgiven(selectedObject);
+    //         if (currentobj) {
+    //             studio.transaction(({ set }) => {
+    //                 set(currentobj.props.position, { x: selectedObject.position.x, y: selectedObject.position.y, z: selectedObject.position.z });
+    //                 set(currentobj.props.rotation, { x: selectedObject.rotation.x, y: selectedObject.rotation.y, z: selectedObject.rotation.z });
+    //                 set(currentobj.props.scale, { x: selectedObject.scale.x, y: selectedObject.scale.y, z: selectedObject.scale.z });
+    //             })
+    //         }
 
-        }
-    }
+    //     }
+    // }
 
-    const resetAllProps = () => {
-        pickableObjects.forEach(element => {
-            selectobjectgiven(element);
-            studio.transaction(({ unset }) => {
-                unset(currentobj.props)
-            })
-        });
-    }
+    // const resetAllProps = () => {
+    //     pickableObjects.forEach(element => {
+    //         selectobjectgiven(element);
+    //         studio.transaction(({ unset }) => {
+    //             unset(currentobj.props)
+    //         })
+    //     });
+    // }
 
     return (<div>
         <div style={{ display: 'flex', border: '1px solid red' }}>
@@ -1050,11 +1051,11 @@ const Threejs = () => {
                         Caspar Control
                         <button onClick={showToCasparcg}>Initialise casparcg</button>
                         <button onClick={updatetoCaspar1}>Update to Caspar</button>
-                        <button onClick={sampleAnimationcaspar}>animation to Caspar</button>
+                        {/* <button onClick={sampleAnimationcaspar}>animation to Caspar</button> */}
 
 
                         <button onClick={resetCameraToCasparc}>caspar camera Reset</button>
-                        <button onClick={() => {
+                        {/* <button onClick={() => {
                             studio.initialize();
                             if (studio.ui.isHidden) {
                                 studio.ui.restore();
@@ -1062,7 +1063,7 @@ const Threejs = () => {
                             else {
                                 studio.ui.hide();
                             }
-                        }}>Toggle Animation Editor</button>
+                        }}>Toggle Animation Editor</button> */}
                     </div>
                     <button onClick={addBox} data-shape={"box"}>Box </button>
                     <button onClick={addShape} data-shape={"cylinder"} >Cylinder </button>
@@ -1103,10 +1104,10 @@ const Threejs = () => {
                         console.log(scene1.children);
                     }}>console log</button>
 
-                    <button onClick={playAnimation}>Play Animation 2s</button>
-                    <button onClick={pauseAnimation}>Pause Animation</button>
-                    <button onClick={sampleAnimation}>Play equivalent threejs Animation</button>
-                    <button onClick={resetAllProps}>Reset all Props</button>
+                    {/* <button onClick={playAnimation}>Play Animation 2s</button>
+                    <button onClick={pauseAnimation}>Pause Animation</button> */}
+                    {/* <button onClick={sampleAnimation}>Play equivalent threejs Animation</button> */}
+                    {/* <button onClick={resetAllProps}>Reset all Props</button> */}
                     {/* <button onClick={() => selectobjectgiven(selectedObject)}>selectobjectgiven</button> */}
                     {/* <button onClick={logkeyframes}>Log keyframes</button> */}
                 </div>
@@ -1119,16 +1120,16 @@ const Threejs = () => {
                             setGl1(gl)
                         }}
                     >
-                        <SheetProvider sheet={demoSheet}>
-                            <OrbitControls enabled={orbitcontrolenable} theatreKey='orb 1' />
-                            <TransformControls ref={reftransform} theatreKey='transformControls 1' onObjectChange={onObjectChange} />
-                            <e.spotLight position={[10, 15, 10]} angle={10.5} intensity={10} theatreKey='spotLight 1' />
-                            <e.spotLight position={[-10, -15, -10]} angle={10.5} intensity={10} theatreKey='spotLight 2' />
-                            <Suspense fallback={null}>
-                                {shapesOnCanvas}
-                            </Suspense>
+                        {/* <SheetProvider sheet={demoSheet}> */}
+                        <OrbitControls enabled={orbitcontrolenable} />
+                        <TransformControls ref={reftransform} />
+                        <spotLight position={[10, 15, 10]} angle={10.5} intensity={10} />
+                        <spotLight position={[-10, -15, -10]} angle={10.5} intensity={10} />
+                        <Suspense fallback={null}>
+                            {shapesOnCanvas}
+                        </Suspense>
 
-                        </SheetProvider>
+                        {/* </SheetProvider> */}
                     </Canvas>
                 </div>
             </div>
@@ -1156,7 +1157,7 @@ const Threejs = () => {
                     <button onClick={resetCamera2}>Reset Camera</button>
                     <button onClick={addLight}>Add light</button>
                     <button onClick={() => console.log(scene2)}>console log</button>
-                    <button onClick={sampleAnimation2}>Play Above animation</button>
+                    {/* <button onClick={sampleAnimation2}>Play Above animation</button> */}
 
                 </div>
                 <div style={{ position: 'absolute', top: 585, minWidth: 200, height: 150, backgroundColor: 'grey', border: '1px solid red' }} >
