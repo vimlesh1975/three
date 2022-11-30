@@ -44,29 +44,29 @@ const Threejs = () => {
 
 
     const onDragEnd = (result) => {
-        const aa1 = [...aa]
+        const aa1 = [...canvasList]
         if (result.destination != null) {
             aa1.splice(result.destination?.index, 0, aa1.splice(result.source?.index, 1)[0])
-            setAA(aa1)
+            setCanvasList(aa1)
         }
     }
 
     const deletePage = e => {
 
-        const aa1 = aa.filter((_, i) => {
+        const aa1 = canvasList.filter((_, i) => {
             return (parseInt(e.target.getAttribute('key1')) !== i)
         });
-        setAA([...aa1])
+        setCanvasList([...aa1])
     }
     const updatePageName = e => {
-        const aa1 = aa.map((val, i) => {
+        const aa1 = canvasList.map((val, i) => {
             return (i === parseInt(e.target.getAttribute('key1'))) ? { ...val, 'pageName': e.target.value } : val;
         });
-        setAA([...aa1])
+        setCanvasList([...aa1])
 
     }
 
-    const [aa, setAA] = useState([])
+    const [canvasList, setCanvasList] = useState([])
     const [scene1, setScene1] = useState({});
     const [scene2, setScene2] = useState({});
     const [camera1, setCamera1] = useState();
@@ -92,11 +92,11 @@ const Threejs = () => {
     //                 const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
     //                 const aa = element.keyframes
     //                 const bb = []
-    //                 aa.forEach((val) => {
+    //                 canvasList.forEach((val) => {
     //                     bb.push(val.position)
     //                 })
     //                 const cc = []
-    //                 aa.forEach((val) => {
+    //                 canvasList.forEach((val) => {
     //                     cc.push(val.value)
     //                 })
     //                 positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
@@ -121,11 +121,11 @@ const Threejs = () => {
     //                 const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
     //                 const aa = element.keyframes
     //                 const bb = []
-    //                 aa.forEach((val) => {
+    //                 canvasList.forEach((val) => {
     //                     bb.push(val.position)
     //                 })
     //                 const cc = []
-    //                 aa.forEach((val) => {
+    //                 canvasList.forEach((val) => {
     //                     cc.push(val.value)
     //                 })
     //                 positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
@@ -182,11 +182,11 @@ const Threejs = () => {
     //                 const animationName = "." + element.__debugName.split(':')[1].split(',')[0].split('"')[1] + "[" + element.__debugName.split(':')[1].split(',')[1].split('"')[1] + "]"
     //                 const aa = element.keyframes
     //                 const bb = []
-    //                 aa.forEach((val) => {
+    //                 canvasList.forEach((val) => {
     //                     bb.push(val.position)
     //                 })
     //                 const cc = []
-    //                 aa.forEach((val) => {
+    //                 canvasList.forEach((val) => {
     //                     cc.push(val.value)
     //                 })
     //                 positionKF2.push(new NumberKeyframeTrack(animationName, bb, cc))
@@ -905,7 +905,7 @@ const Threejs = () => {
     const loadscene = (i) => {
         // localStorage.removeItem("theatre-0.4.persistent");
         const loader = new GLTFLoader();
-        loader.parse((aa[i].gltf), '', (gltf) => {
+        loader.parse((canvasList[i].gltf), '', (gltf) => {
             (gltf.scene.children).forEach((element, ii) => {
                 if (element.type === 'Mesh') {
                     addImportedShape("imported", element, ii)
@@ -913,10 +913,10 @@ const Threejs = () => {
             })
             setShapesOnCanvas([...imported1]);
             setImported1([]);
-            const cameraPosition = JSON.parse(aa[i].cameraPosition);
+            const cameraPosition = JSON.parse(canvasList[i].cameraPosition);
             camera1.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2]);
-            // console.log(JSON.parse(aa[i].animation));
-            // setdemoSheet(getProject('Demo Project' + Math.floor(Math.random() * 10), { state: JSON.parse(aa[i].animation) }).sheet('Demo Sheet'))
+            // console.log(JSON.parse( canvasList[i].animation));
+            // setdemoSheet(getProject('Demo Project' + Math.floor(Math.random() * 10), { state: JSON.parse( canvasList[i].animation) }).sheet('Demo Sheet'))
         });
     }
 
@@ -956,14 +956,14 @@ const Threejs = () => {
 
 
     const saveScene = () => {
-        const dd = [...aa];
+        const dd = [...canvasList];
 
         const exporter = new GLTFExporter();
         exporter.parse(
             scene1,
             gltf => {
                 dd.push({ pageName: 'page' + dd.length, gltf: JSON.stringify(gltf), cameraPosition: JSON.stringify([camera1.position.x, camera1.position.y, camera1.position.z]) });
-                setAA(dd)
+                setCanvasList(dd)
             },
             function (error) {
                 console.log('An error happened');
@@ -987,7 +987,7 @@ const Threejs = () => {
 
         const writable1 = await aa1.createWritable();
         var bb = '';
-        aa.forEach(val => {
+        canvasList.forEach(val => {
             bb += JSON.stringify({ pageName: val.pageName, gltf: val.gltf, cameraPosition: val.cameraPosition, animation: val.animation }) + '\r\n'
         });
         const file1 = new Blob([bb], { type: 'text/plain' });
@@ -1013,7 +1013,7 @@ const Threejs = () => {
             aa2.push(cc)
         });
 
-        setAA(aa2)
+        setCanvasList(aa2)
     };
     // const onObjectChange = () => {
 
@@ -1195,7 +1195,7 @@ const Threejs = () => {
                                 >
                                     <table border='1'>
                                         <tbody>
-                                            {aa.map((val, i) => {
+                                            {canvasList.map((val, i) => {
                                                 return (
                                                     <Draggable draggableId={"draggable" + i} key={i} index={i}>
                                                         {(provided, snapshot) => (
