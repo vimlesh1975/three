@@ -73,6 +73,8 @@ const Threejs = () => {
   };
 
   const [aa, setAA] = useState([]);
+  const [currentPage, setCurrentPage] = useState(null);
+
   const [scene1, setScene1] = useState({});
   const [scene2, setScene2] = useState({});
   const [camera1, setCamera1] = useState();
@@ -624,6 +626,7 @@ const Threejs = () => {
 
   const updatetoCaspar1 = () => {
     DeselectAll();
+    demoSheet.sequence.position = 0;
     var exporter = new GLTFExporter();
     exporter.parse(
       scene1,
@@ -1246,6 +1249,47 @@ const Threejs = () => {
     );
   };
 
+  const updateScene = (index) => {
+    const dd = [...aa];
+
+    const exporter = new GLTFExporter();
+    exporter.parse(
+      scene1,
+      (gltf) => {
+        // dd.push({
+        //   pageName: "page" + dd.length,
+        //   gltf: JSON.stringify(gltf),
+        //   cameraPosition: JSON.stringify([
+        //     camera1.position.x,
+        //     camera1.position.y,
+        //     camera1.position.z,
+        //   ]),
+        //   animation: JSON.stringify(
+        //     studio.createContentOfSaveFile("Demo Project")
+        //   ),
+        // });
+        const updatedScene = {
+          pageName: "page" + dd.length,
+          gltf: JSON.stringify(gltf),
+          cameraPosition: JSON.stringify([
+            camera1.position.x,
+            camera1.position.y,
+            camera1.position.z,
+          ]),
+          animation: JSON.stringify(
+            studio.createContentOfSaveFile("Demo Project")
+          ),
+        };
+        dd[index] = updatedScene;
+        setAA(dd);
+      },
+      function (error) {
+        console.log("An error happened");
+      },
+      {}
+    );
+  };
+
   let fileReader;
 
   async function saveList() {
@@ -1595,7 +1639,9 @@ const Threejs = () => {
           <h1>Timeline Area</h1>
         </div>
         <div>
+          {currentPage}
           <button onClick={saveScene}>Save scene</button>
+          <button onClick={() => updateScene(currentPage)}>Update scene</button>
           <button onClick={saveList}>Save list</button>
           <span title="Will append list">Add File:</span>{" "}
           <input
@@ -1678,6 +1724,7 @@ const Threejs = () => {
                                       }}
                                       onClick={(e) => {
                                         loadscene(i);
+                                        setCurrentPage(i);
                                       }}
                                       key1={i}
                                       key2={"vimlesh"}
